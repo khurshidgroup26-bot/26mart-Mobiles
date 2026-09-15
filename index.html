@@ -124,6 +124,8 @@
   }
   .order-btn.disabled{background:#C9CBDA; pointer-events:none;}
   .empty-note{color:var(--muted); font-size:13.5px; padding:30px 0; text-align:center;}
+  .chip{background:#fff; border:1px solid var(--line); padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:500; cursor:pointer; color:var(--muted);}
+  .chip.active{background:var(--navy); border-color:var(--navy); color:#fff;}
 
   /* ---------- Why us ---------- */
   .why-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
@@ -263,6 +265,25 @@
       <h2>Available Mobiles</h2>
       <p>Choose a model, compare its variants and specs, then place your order on the website. Pay at delivery or at shop pickup.</p>
     </div>
+    <div class="filter-bar" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+      <input type="text" id="searchInput" placeholder="Mobile search karein (naam ya variant)..." oninput="onSearch(this.value)" style="padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff;">
+      <div class="chips" id="categoryChips" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="companyFilter" onchange="onCompanyChange(this.value)" style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);">
+          <option value="all">Sari Companies</option>
+        </select>
+        <select id="priceFilter" onchange="onPriceChange(this.value)" style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);">
+          <option value="all">Sab Prices</option>
+          <option value="0-30000">0 – 30,000</option>
+          <option value="30000-60000">30,000 – 60,000</option>
+          <option value="60000-100000">60,000 – 100,000</option>
+          <option value="100000-999999999">100,000+</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;">
+          <input type="checkbox" id="stockOnlyToggle" onchange="onStockOnlyChange(this.checked)" style="width:auto;"> Sirf Stock Mein
+        </label>
+      </div>
+    </div>
     <div id="loadingNote" class="empty-note">Phones load ho rahe hain...</div>
     <div class="grid" id="productGrid"></div>
     <div class="empty-note" id="emptyNote" style="display:none;">No mobiles are listed right now. Please check again soon.</div>
@@ -398,6 +419,10 @@
         <div><label>Variant</label><input type="text" id="fVariant" placeholder="4GB / 128GB"></div>
       </div>
       <div class="f-row">
+        <div><label>Company / Brand</label><input type="text" id="fCompany" placeholder="Infinix"></div>
+        <div><label>Category</label><input type="text" id="fCategory" placeholder="Smartphone"></div>
+      </div>
+      <div class="f-row">
         <div><label>Display name</label><input type="text" id="fName" placeholder="Spark Go 3 4GB/128GB"></div>
         <div><label>Sale price (Rs.)</label><input type="number" id="fPrice" min="0" placeholder="45000"></div>
       </div>
@@ -417,8 +442,8 @@
     <div class="admin-form">
       <label>Bulk Add (ek line = ek mobile/variant)</label>
       <p style="font-size:11.5px;color:var(--muted);margin:2px 0 8px;line-height:1.5">
-        Format: Model Name | Variant | Price | Before Price | Qty | Image URL | Specs (semicolon ; se separate) | Gift(yes/no) | Featured(yes/no)<br>
-        Misaal: <code>Spark Go 3|4GB/128GB|45000|50000|5|images/spark-go-3.jpg|6.6 inch display;5000mAh battery|yes|no</code>
+        Format: Model Name | Variant | Company | Category | Price | Before Price | Qty | Image URL | Specs (semicolon ; se separate) | Gift(yes/no) | Featured(yes/no)<br>
+        Misaal: <code>Spark Go 3|4GB/128GB|Infinix|Smartphone|45000|50000|5|images/spark-go-3.jpg|6.6 inch display;5000mAh battery|yes|no</code>
       </p>
       <textarea id="bulkInput" rows="6" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:monospace"></textarea>
       <button class="save-btn" onclick="bulkAddPhones()">Bulk Add Karein</button><div class="admin-msg" id="bulkMsg"></div>
@@ -491,6 +516,11 @@ let authMode = 'login';
 let selectedPhone = null;
 let selectedFamily = [];
 let editingId = null;
+let searchQuery = '';
+let activePriceRange = 'all';
+let stockOnlyFilter = false;
+let activeCategory = 'all';
+let activeCompany = 'all';
 
 function isFirebaseConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY'); }
 function safeNum(v){ const n=Number(v); return Number.isFinite(n)?n:0; }
@@ -504,26 +534,58 @@ async function initStorage(){
   if(isFirebaseConfigured()){
     try{
       firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore(); auth=firebase.auth(); usingFirebase=true;
-      db.collection('phones').onSnapshot(snap=>{ phones=snap.docs.map(d=>({id:d.id,...d.data()})); renderShop(); renderAdminTable(); }, err=>{ console.error(err); document.getElementById('loadingNote').textContent='Unable to load products. Please try again.'; });
+      db.collection('phones').onSnapshot(snap=>{ phones=snap.docs.map(d=>({id:d.id,...d.data()})); buildFilterOptions(); renderShop(); renderAdminTable(); }, err=>{ console.error(err); document.getElementById('loadingNote').textContent='Unable to load products. Please try again.'; });
       db.collection('settings').doc('site').onSnapshot(doc=>{ const a=doc.exists?(doc.data().announcement||''):''; renderOfferStrip(a); document.getElementById('announcementInput').value=a; });
       auth.onAuthStateChanged(user=>{ const st=document.getElementById('userStatus'); st.textContent=user?`Signed in: ${user.email}`:''; });
       return;
     }catch(e){ console.error(e); }
   }
-  usingFirebase=false; document.getElementById('demoBanner').style.display='block'; renderOfferStrip(''); renderShop(); renderAdminTable();
+  usingFirebase=false; document.getElementById('demoBanner').style.display='block'; renderOfferStrip(''); buildFilterOptions(); renderShop(); renderAdminTable();
 }
 function renderOfferStrip(announcement=''){ const track=document.getElementById('offerTrack'); const msgs=[announcement,...OFFER_MESSAGES].filter(Boolean); const items=msgs.map(m=>`<span>${escapeHtml(m)}</span>`).join(''); track.innerHTML=items+items; }
 function sortedPhones(){ return [...phones].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)); }
+function buildFilterOptions(){
+  const categories=[...new Set(phones.map(p=>p.category).filter(Boolean))];
+  const companies=[...new Set(phones.map(p=>p.company).filter(Boolean))];
+  const chipsWrap=document.getElementById('categoryChips');
+  chipsWrap.innerHTML='<button class="chip '+(activeCategory==='all'?'active':'')+'" onclick="onCategoryChange(\'all\')">Sab</button>'+
+    categories.map(c=>`<button class="chip ${activeCategory===c?'active':''}" onclick="onCategoryChange('${escapeHtml(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join('');
+  const companySel=document.getElementById('companyFilter'); const currentVal=companySel.value;
+  companySel.innerHTML='<option value="all">Sari Companies</option>'+companies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  if(companies.includes(currentVal)) companySel.value=currentVal;
+}
+function onSearch(val){ searchQuery = val.trim().toLowerCase(); renderShop(); }
+function onPriceChange(val){ activePriceRange = val; renderShop(); }
+function onStockOnlyChange(val){ stockOnlyFilter = val; renderShop(); }
+function onCategoryChange(cat){ activeCategory = cat; buildFilterOptions(); renderShop(); }
+function onCompanyChange(val){ activeCompany = val; renderShop(); }
+function passesFilters(p){
+  if(searchQuery){
+    const hay = ((p.baseName||p.name||'')+' '+(p.variant||'')+' '+(p.company||'')).toLowerCase();
+    if(!hay.includes(searchQuery)) return false;
+  }
+  if(activeCategory!=='all' && p.category!==activeCategory) return false;
+  if(activeCompany!=='all' && p.company!==activeCompany) return false;
+  if(activePriceRange!=='all'){
+    const [lo,hi] = activePriceRange.split('-').map(Number);
+    const pr = safeNum(p.price);
+    if(pr < lo || pr > hi) return false;
+  }
+  return true;
+}
 function renderShop(){
   document.getElementById('loadingNote').style.display='none'; const grid=document.getElementById('productGrid'); const empty=document.getElementById('emptyNote'); grid.innerHTML='';
-  if(!phones.length){empty.style.display='block';return} empty.style.display='none';
-  const groups=new Map(); sortedPhones().forEach(p=>{const key=normalizeFamily(p); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(p);});
+  if(!phones.length){empty.textContent='No mobiles are listed right now. Please check again soon.';empty.style.display='block';return} empty.style.display='none';
+  const groups=new Map(); sortedPhones().filter(passesFilters).forEach(p=>{const key=normalizeFamily(p); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(p);});
+  let shown=0;
   groups.forEach(group=>{
-    const p=group[0], inStock=group.some(x=>safeNum(x.qty)>0); const card=document.createElement('div'); card.className='pcard '+(group.some(x=>x.featured)?'featured':'');
+    const p=group[0], inStock=group.some(x=>safeNum(x.qty)>0); if(stockOnlyFilter && !inStock) return; shown++;
+    const card=document.createElement('div'); card.className='pcard '+(group.some(x=>x.featured)?'featured':'');
     const img=p.image?`<img src="${escapeHtml(p.image)}" alt="${escapeHtml(familyName(p))}" onerror="this.parentElement.innerHTML='<div class=&quot;noimg&quot;>Image unavailable</div>'">`:'<div class="noimg">No image</div>';
     card.innerHTML=`${group.some(x=>x.featured)?'<div class="featured-label">★ Featured</div>':''}${p.gift?'<div class="gift-flag">🎁 Free Gift</div>':''}<div class="imgwrap">${img}</div><div class="body"><p class="pname">${escapeHtml(familyName(p))}</p><div><span class="old-price">${p.oldPrice?fmtPrice(p.oldPrice):''}</span><span class="sale-price">${fmtPrice(p.price)}</span></div><div class="stock-row ${inStock?'in':'out'}"><span class="dot ${inStock?'':'out'}"></span>${inStock?'Stock Available':'Out of Stock'}</div><div class="view-count">${safeNum(p.views)} total views</div><button class="order-btn" onclick="openProduct('${p.id}')">View Variants & Details</button></div>`;
     grid.appendChild(card);
   });
+  if(!shown){ empty.textContent='Is search/filter ke sath koi mobile nahi mila.'; empty.style.display='block'; }
 }
 function openProduct(id){
   const base=phones.find(p=>p.id===id); if(!base)return; selectedFamily=phones.filter(p=>normalizeFamily(p)===normalizeFamily(base)); selectedPhone=base; renderProductModal(); document.getElementById('productModal').classList.add('show'); incrementView(base.id);
@@ -552,14 +614,14 @@ function showAdminIfAuthorized(){ if(!auth||!auth.currentUser){openAuthModal('lo
 function closeAdminPanel(){document.getElementById('adminPanel').style.display='none';window.scrollTo({top:0,behavior:'smooth'});}
 async function addPhone(){
  const msg=document.getElementById('adminMsg');msg.className='admin-msg';msg.textContent=''; if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
- const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
+ const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),company=document.getElementById('fCompany').value.trim(),category=document.getElementById('fCategory').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
  if(!baseName||!name||price<=0){msg.className='admin-msg err';msg.textContent='Model name and a valid sale price are required.';return;}
  try{
    if(editingId){
-     await db.collection('phones').doc(editingId).update({baseName,variant,name,price,oldPrice,qty,image,specs,gift,featured});
+     await db.collection('phones').doc(editingId).update({baseName,variant,company,category,name,price,oldPrice,qty,image,specs,gift,featured});
      msg.className='admin-msg ok';msg.textContent='Mobile/variant updated.';
    }else{
-     await db.collection('phones').add({baseName,variant,name,price,oldPrice,qty,image,specs,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+     await db.collection('phones').add({baseName,variant,company,category,name,price,oldPrice,qty,image,specs,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
      msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';
    }
    cancelEdit();
@@ -570,6 +632,8 @@ function fillFormForEdit(id){
   editingId=id;
   document.getElementById('fBaseName').value=p.baseName||'';
   document.getElementById('fVariant').value=p.variant||'';
+  document.getElementById('fCompany').value=p.company||'';
+  document.getElementById('fCategory').value=p.category||'';
   document.getElementById('fName').value=p.name||'';
   document.getElementById('fPrice').value=p.price||'';
   document.getElementById('fOldPrice').value=p.oldPrice||'';
@@ -585,7 +649,7 @@ function fillFormForEdit(id){
 }
 function cancelEdit(){
   editingId=null;
-  ['fBaseName','fVariant','fName','fPrice','fOldPrice','fQty','fImage','fSpecs'].forEach(id=>document.getElementById(id).value='');
+  ['fBaseName','fVariant','fCompany','fCategory','fName','fPrice','fOldPrice','fQty','fImage','fSpecs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fGift').checked=false;
   document.getElementById('fFeatured').checked=false;
   document.getElementById('savePhoneBtn').textContent='Add Mobile / Variant';
@@ -600,10 +664,11 @@ async function bulkAddPhones(){
   const items=[];
   lines.forEach(line=>{
     const parts=line.split('|').map(s=>s.trim());
-    const [baseName,variant,price,oldPrice,qty,image,specs,gift,featured]=parts;
+    const [baseName,variant,company,category,price,oldPrice,qty,image,specs,gift,featured]=parts;
     if(!baseName||!price)return;
     items.push({
-      baseName, variant: variant||'', name: variant?`${baseName} ${variant}`:baseName,
+      baseName, variant: variant||'', company: company||'', category: category||'',
+      name: variant?`${baseName} ${variant}`:baseName,
       price: safeNum(price), oldPrice: safeNum(oldPrice), qty: safeNum(qty),
       image: image||'', specs: specs?specs.split(';').map(s=>s.trim()).filter(Boolean).join('\n'):'',
       gift: (gift||'').toLowerCase()==='yes', featured: (featured||'').toLowerCase()==='yes',
