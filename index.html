@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>26 Mart Mobiles — Wah Cantt | Naye Mobile Ghar Baithay</title>
-<meta name="description" content="26 Mart Mobiles - Wah Cantt aur Basti mein mobile shop. Bina advance, free home delivery, har mobile ke sath gift, installments available.">
+<title>26 Mart Mobiles — Wah Cantt | Mobile Phones Online</title>
+<meta name="description" content="26 Mart Mobiles - Wah Cantt and Basti mobile store. Order online, pay at delivery or shop pickup, with free delivery in Wah Cantt.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- ===== FIREBASE (compat SDK) ===== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <style>
   :root{
@@ -22,97 +24,114 @@
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
-  body{margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; line-height:1.5;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',sans-serif; line-height:1.5;
+  }
   h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif; font-weight:700; letter-spacing:-0.01em;}
   a{color:inherit;}
   img{max-width:100%; display:block;}
   .wrap{max-width:1080px; margin:0 auto; padding:0 18px;}
-  button{font-family:inherit;}
 
   /* ---------- Top bar ---------- */
-  .topbar{background:var(--navy); color:#fff; padding:10px 0; font-size:12.5px;}
+  .topbar{
+    background:var(--navy); color:#fff; padding:10px 0;
+    font-size:12.5px;
+  }
   .topbar .wrap{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
   .topbar .brand{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; letter-spacing:0.01em;}
   .topbar .brand span{color:var(--gold);}
-  .topbar .right{display:flex; align-items:center; gap:14px;}
   .topbar .contact-links{display:flex; gap:14px;}
   .topbar .contact-links a{text-decoration:none; opacity:.9; font-weight:500;}
   .topbar .contact-links a:hover{opacity:1;}
-  .icon-btn{background:none; border:none; color:#fff; cursor:pointer; font-size:16px; position:relative; padding:2px;}
-  .badge-dot{position:absolute; top:-3px; right:-4px; background:var(--gold); color:var(--navy); font-size:9px; font-weight:700; min-width:14px; height:14px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px;}
-  .signup-link{background:var(--gold); color:var(--navy); border:none; padding:6px 12px; border-radius:7px; font-weight:600; font-size:12px; cursor:pointer;}
-
-  /* ---------- Announcement bar ---------- */
-  .announce-bar{background:#FFF3D6; border-bottom:1px solid #F0D48A; color:#7A5A00; font-size:12.5px; padding:8px 0; display:none;}
-  .announce-bar .wrap{display:flex; align-items:center; gap:8px;}
 
   /* ---------- Offer strip ---------- */
-  .offer-strip{background:var(--gold); color:var(--navy); overflow:hidden; white-space:nowrap; border-bottom:1px solid var(--gold-dark);}
-  .offer-strip .track{display:inline-block; padding:8px 0; font-size:13px; font-weight:600; animation:scroll-left 26s linear infinite;}
+  .offer-strip{
+    background:var(--gold); color:var(--navy); overflow:hidden; white-space:nowrap;
+    border-bottom:1px solid var(--gold-dark);
+  }
+  .offer-strip .track{
+    display:inline-block; padding:8px 0; font-size:13px; font-weight:600;
+    animation:scroll-left 26s linear infinite;
+  }
   .offer-strip .track span{margin:0 26px;}
-  @keyframes scroll-left{0%{transform:translateX(0);} 100%{transform:translateX(-50%);}}
-  @media (prefers-reduced-motion: reduce){.offer-strip .track{animation:none;}}
+  @keyframes scroll-left{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .offer-strip .track{animation:none;}
+  }
 
   /* ---------- Hero ---------- */
-  .hero{background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 100%); color:#fff; padding:40px 0 46px;}
+  .hero{
+    background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 100%);
+    color:#fff; padding:44px 0 52px;
+  }
   .hero .wrap{display:flex; flex-direction:column; gap:14px;}
-  .hero h1{font-size:clamp(24px,6vw,38px); margin:0; line-height:1.15;}
-  .hero p{margin:0; color:#C7CAE0; font-size:15px; max-width:480px;}
-  .hero-badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
-  .badge{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:500; color:#EDEFFA;}
-  .hero-cta{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
-  .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px; font-weight:600; font-size:14.5px; text-decoration:none; border:none; cursor:pointer;}
+  .hero h1{font-size:clamp(26px,6vw,40px); margin:0; line-height:1.15;}
+  .hero p{margin:0; color:#C7CAE0; font-size:15.5px; max-width:480px;}
+  .hero-badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .badge{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+    padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:500; color:#EDEFFA;
+  }
+  .hero-cta{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px;
+    font-weight:600; font-size:14.5px; text-decoration:none; border:none; cursor:pointer;
+  }
   .btn-gold{background:var(--gold); color:var(--navy);}
   .btn-gold:active{background:var(--gold-dark);}
   .btn-outline{background:transparent; border:1px solid rgba(255,255,255,.35); color:#fff;}
-  .btn-sm{padding:8px 14px; font-size:13px;}
 
   /* ---------- Section heading ---------- */
-  .section{padding:32px 0;}
-  .section-head{margin-bottom:16px;}
-  .section-head h2{font-size:21px; margin:0 0 6px;}
-  .section-head p{margin:0; color:var(--muted); font-size:13.5px;}
-
-  /* ---------- Filter bar ---------- */
-  .filter-bar{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
-  .search-row{display:flex; gap:8px;}
-  .search-row input{flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; background:#fff;}
-  .chips{display:flex; gap:7px; flex-wrap:wrap;}
-  .chip{background:#fff; border:1px solid var(--line); padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:500; cursor:pointer; color:var(--muted);}
-  .chip.active{background:var(--navy); border-color:var(--navy); color:#fff;}
-  .select-row{display:flex; gap:8px; flex-wrap:wrap;}
-  .select-row select{padding:9px 11px; border:1px solid var(--line); border-radius:9px; font-size:13px; background:#fff; color:var(--ink);}
+  .section{padding:38px 0;}
+  .section-head{margin-bottom:18px;}
+  .section-head h2{font-size:22px; margin:0 0 6px;}
+  .section-head p{margin:0; color:var(--muted); font-size:14px;}
 
   /* ---------- Product grid ---------- */
   .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
   @media (min-width:640px){ .grid{grid-template-columns:repeat(3,1fr);} }
   @media (min-width:920px){ .grid{grid-template-columns:repeat(4,1fr);} }
 
-  .pcard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; position:relative; cursor:pointer;}
-  .pcard .imgwrap{aspect-ratio:1/1; background:#EDEFF6; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .pcard{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column; position:relative;
+  }
+  .pcard .imgwrap{
+    aspect-ratio:1/1; background:#EDEFF6; display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
   .pcard .imgwrap img{width:100%; height:100%; object-fit:cover;}
   .pcard .imgwrap .noimg{color:#9CA0BE; font-size:12px; text-align:center; padding:10px;}
-  .gift-flag{position:absolute; top:8px; left:8px; background:var(--navy); color:var(--gold); font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:6px; z-index:2;}
-  .pcard .body{padding:10px 11px 12px; display:flex; flex-direction:column; gap:4px; flex:1;}
-  .pcard .pcompany{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .gift-flag{
+    position:absolute; top:8px; left:8px; background:var(--navy); color:var(--gold);
+    font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:6px;
+  }
+  .pcard .body{padding:10px 11px 12px; display:flex; flex-direction:column; gap:5px; flex:1;}
   .pcard .pname{font-size:13.5px; font-weight:600; margin:0; line-height:1.3;}
-  .price-row{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;}
-  .price-old{font-size:11.5px; color:var(--muted); text-decoration:line-through;}
-  .price-new{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; color:var(--navy);}
-  .price-from{font-size:11px; color:var(--muted);}
+  .pcard .pprice{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; color:var(--navy);}
   .stock-row{display:flex; align-items:center; gap:5px; font-size:11.5px;}
   .dot{width:7px; height:7px; border-radius:50%; background:var(--green);}
   .dot.out{background:var(--red);}
   .stock-row.in{color:var(--green);}
   .stock-row.out{color:var(--red);}
-  .order-btn{margin-top:auto; background:var(--green); color:#fff; border:none; padding:9px 0; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; text-align:center; text-decoration:none;}
+  .order-btn{
+    margin-top:auto; background:var(--green); color:#fff; border:none; padding:9px 0;
+    border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; text-align:center; text-decoration:none;
+  }
   .order-btn.disabled{background:#C9CBDA; pointer-events:none;}
   .empty-note{color:var(--muted); font-size:13.5px; padding:30px 0; text-align:center;}
 
   /* ---------- Why us ---------- */
   .why-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media (min-width:640px){ .why-grid{grid-template-columns:repeat(4,1fr);} }
-  .why-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; text-align:left;}
+  .why-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; text-align:left;
+  }
   .why-card .ic{font-size:22px; margin-bottom:8px;}
   .why-card h3{font-size:14px; margin:0 0 4px;}
   .why-card p{font-size:12.5px; color:var(--muted); margin:0; line-height:1.4;}
@@ -125,6 +144,7 @@
   .shop-card h3{font-size:15.5px; margin:0 0 6px;}
   .shop-card .tag{display:inline-block; font-size:11px; font-weight:600; color:var(--green); background:var(--green-bg); padding:2px 9px; border-radius:999px; margin-bottom:8px;}
   .shop-card address{font-style:normal; font-size:13.5px; color:var(--muted); margin:0 0 10px; line-height:1.5;}
+  .shop-card .btn{padding:8px 14px; font-size:13px;}
 
   /* ---------- Contact CTA ---------- */
   .contact-cta{background:var(--navy); color:#fff; text-align:center;}
@@ -134,50 +154,38 @@
 
   /* ---------- Other sites ---------- */
   .other-sites{display:flex; flex-wrap:wrap; gap:10px;}
-  .other-sites a{border:1px solid var(--line); background:#fff; padding:9px 15px; border-radius:9px; font-size:13px; font-weight:500; text-decoration:none; color:var(--navy);}
+  .other-sites a{
+    border:1px solid var(--line); background:#fff; padding:9px 15px; border-radius:9px;
+    font-size:13px; font-weight:500; text-decoration:none; color:var(--navy);
+  }
 
   /* ---------- Footer ---------- */
   footer{padding:22px 0 30px; text-align:center; color:var(--muted); font-size:12px;}
   footer a{color:var(--muted); text-decoration:underline;}
 
   /* ---------- Floating WhatsApp ---------- */
-  .float-wa{position:fixed; bottom:18px; right:18px; background:#25D366; color:#fff; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.25); z-index:40;}
+  .float-wa{
+    position:fixed; bottom:18px; right:18px; background:#25D366; color:#fff;
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.25); z-index:40;
+  }
   .float-wa svg{width:27px; height:27px;}
 
-  /* ---------- Generic overlay/modal ---------- */
-  .overlay{position:fixed; inset:0; background:rgba(10,12,25,.55); display:none; align-items:flex-end; justify-content:center; z-index:90; padding:0;}
-  .overlay.show{display:flex;}
-  @media (min-width:640px){ .overlay{align-items:center;} }
-  .sheet{background:#fff; width:100%; max-width:480px; border-radius:16px 16px 0 0; padding:18px; max-height:88vh; overflow-y:auto;}
-  @media (min-width:640px){ .sheet{border-radius:16px;} }
-  .sheet-close{float:right; background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1;}
-  .sheet h3{margin:0 0 4px; font-size:17px; clear:both;}
+  /* ---------- Product/detail/order/auth modals ---------- */
+  .modal{position:fixed;inset:0;background:rgba(10,12,25,.72);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;overflow:auto}
+  .modal.show{display:flex}.modal-box{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:92vh;overflow:auto;padding:20px;position:relative}
+  .modal-close{position:absolute;right:12px;top:10px;border:0;background:var(--paper);width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:650px){.detail-grid{grid-template-columns:1fr}}
+  .detail-image{width:100%;aspect-ratio:1/1;object-fit:contain;background:#f1f2f7;border-radius:12px;cursor:zoom-in}.variant-list{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.variant-btn{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:8px;cursor:pointer}.variant-btn.active{background:var(--navy);color:#fff}
+  .old-price{text-decoration:line-through;color:#8a8da2;font-size:13px;margin-right:7px}.sale-price{font-family:'Space Grotesk';font-weight:700;font-size:22px;color:var(--navy)}
+  .specs{white-space:pre-line;background:var(--paper);padding:12px;border-radius:10px;font-size:13px;color:var(--muted);margin-top:12px}.share-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.small-btn{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:8px;cursor:pointer;font-weight:600}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:600px){.form-grid{grid-template-columns:1fr}}.form-grid input,.form-grid textarea,.form-grid select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}.form-grid textarea{min-height:80px}.full{grid-column:1/-1}.userbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:8px 0}.userbar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font-weight:600}.featured{box-shadow:0 0 0 2px var(--gold) inset}.featured-label{position:absolute;top:8px;right:8px;background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px}.view-count{font-size:11px;color:var(--muted)}
 
-  /* Product detail modal */
-  #detailOverlay .sheet img{width:100%; height:180px; object-fit:cover; border-radius:10px; background:#eee; margin-bottom:10px;}
-  .spec-list{list-style:none; padding:0; margin:8px 0; font-size:13px; color:var(--muted);}
-  .spec-list li{padding:4px 0; border-bottom:1px dashed var(--line);}
-  .variant-opt{display:inline-flex; flex-direction:column; align-items:flex-start; padding:8px 12px; border:1px solid var(--line); border-radius:9px; margin:0 6px 6px 0; cursor:pointer; background:#fafafa; font-size:12.5px;}
-  .variant-opt b{font-size:13.5px;}
-  .variant-opt.sel{background:var(--navy); color:#fff; border-color:var(--navy);}
-  .variant-opt.disabled{opacity:.4; pointer-events:none;}
-  .detail-msg{font-size:13px; margin-top:8px; min-height:16px;}
-  .detail-msg.err{color:var(--red);}
-
-  /* Signup modal */
-  .form-field{margin-bottom:10px;}
-  .form-field label{display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px;}
-  .form-field input{width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:14px;}
-
-  /* Notification dropdown */
-  .notif-panel{position:fixed; top:52px; right:12px; background:#fff; border:1px solid var(--line); border-radius:12px; width:280px; max-height:360px; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,.18); z-index:95; display:none;}
-  .notif-panel.show{display:block;}
-  .notif-item{padding:11px 14px; border-bottom:1px solid var(--line); font-size:13px;}
-  .notif-item:last-child{border-bottom:none;}
-  .notif-empty{padding:20px; text-align:center; color:var(--muted); font-size:13px;}
-
-  /* ---------- Admin gate ---------- */
-  .admin-gate{position:fixed; inset:0; background:rgba(10,12,25,.6); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+  /* ---------- Admin ---------- */
+  .admin-gate{
+    position:fixed; inset:0; background:rgba(10,12,25,.6); display:none;
+    align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
   .admin-gate.show{display:flex;}
   .admin-box{background:#fff; border-radius:var(--radius); padding:20px; max-width:320px; width:100%;}
   .admin-box h3{margin:0 0 10px; font-size:16px;}
@@ -191,33 +199,24 @@
   #adminPanel{display:none; background:#fff; border-top:4px solid var(--gold);}
   #adminPanel .wrap{padding-top:24px; padding-bottom:36px;}
   .demo-banner{background:#FFF3D6; border:1px solid #F0D48A; color:#7A5A00; font-size:12.5px; padding:9px 14px; border-radius:9px; margin-bottom:16px;}
-  .admin-tabs{display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;}
-  .admin-tab-btn{background:var(--paper); border:1px solid var(--line); padding:8px 14px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; color:var(--muted);}
-  .admin-tab-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
-  .admin-tab-pane{display:none;}
-  .admin-tab-pane.active{display:block;}
   .admin-form{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:22px;}
   .admin-form .f-row{display:flex; gap:10px; flex-wrap:wrap;}
   .admin-form .f-row > div{flex:1; min-width:140px;}
   .admin-form label{display:block; font-size:12.5px; color:var(--muted); margin:10px 0 4px;}
-  .admin-form input, .admin-form select, .admin-form textarea{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit;}
-  .admin-form textarea{resize:vertical;}
+  .admin-form input, .admin-form select{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px;
+  }
   .admin-form .save-btn{margin-top:14px; background:var(--navy); color:#fff; border:none; padding:11px 18px; border-radius:9px; font-weight:600; cursor:pointer;}
-  .admin-form .cancel-edit-btn{margin-top:14px; margin-left:8px; background:none; border:1px solid var(--line); padding:11px 18px; border-radius:9px; font-weight:600; cursor:pointer; color:var(--muted);}
   .admin-msg{font-size:13px; margin-top:8px; min-height:16px;}
   .admin-msg.ok{color:var(--green);}
   .admin-msg.err{color:var(--red);}
-  .field-block{border:1px dashed var(--line); border-radius:8px; padding:10px; margin-top:10px;}
-  .field-block .rm{float:left; color:var(--red); background:none; border:none; font-size:12.5px; cursor:pointer; padding:0;}
   .admin-table{width:100%; border-collapse:collapse; font-size:13px;}
   .admin-table th, .admin-table td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:middle;}
   .admin-table img{width:38px; height:38px; object-fit:cover; border-radius:6px; background:#eee;}
-  .admin-table .edit{color:var(--navy); background:none; border:1px solid var(--line); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px;}
+  .admin-table input[type=number], .admin-table input[type=text]{width:80px; padding:5px 6px; font-size:12.5px; border:1px solid var(--line); border-radius:6px;}
   .admin-table .del{color:var(--red); background:none; border:none; cursor:pointer; font-size:12.5px;}
+  .admin-table .upd{color:var(--navy); background:none; border:1px solid var(--line); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px;}
   .close-admin{background:none; border:1px solid var(--line); padding:7px 14px; border-radius:8px; font-size:12.5px; cursor:pointer; margin-top:6px;}
-  .help-note{font-size:12px; color:var(--muted); background:#EEF0F8; border-radius:8px; padding:10px 12px; margin-bottom:12px; line-height:1.5;}
-  .announce-list{list-style:none; padding:0; margin:14px 0 0;}
-  .announce-list li{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
 </style>
 </head>
 <body>
@@ -226,41 +225,33 @@
 <div class="topbar">
   <div class="wrap">
     <div class="brand">26 <span>Mart</span> Mobiles</div>
-    <div class="right">
-      <div class="contact-links">
-        <a href="tel:+923390011126">📞 0339-0011126</a>
-        <a href="https://wa.me/923068988411" target="_blank" rel="noopener">💬 0306-8988411</a>
-      </div>
-      <button class="signup-link" onclick="openSignup()">Sign Up</button>
-      <button class="icon-btn" onclick="toggleNotifications()" title="Notifications">
-        🔔<span class="badge-dot" id="notifBadge" style="display:none;">0</span>
-      </button>
+    <div class="contact-links">
+      <a href="tel:+923390011126">📞 0339-0011126</a>
+      <a href="https://wa.me/923068988411" target="_blank" rel="noopener">💬 0306-8988411</a>
     </div>
   </div>
 </div>
-
-<!-- ======================= ANNOUNCEMENT BAR ======================= -->
-<div class="announce-bar" id="announceBar">
-  <div class="wrap"><span id="announceText"></span></div>
-</div>
+<div class="userbar wrap"><button onclick="openAuthModal('login')">Login</button><button onclick="openAuthModal('signup')">Sign Up</button><span id="userStatus" style="font-size:12px;color:var(--muted)"></span><button onclick="showAdminIfAuthorized()">Admin</button></div>
 
 <!-- ======================= OFFER STRIP ======================= -->
-<div class="offer-strip"><div class="track" id="offerTrack"></div></div>
+<div class="offer-strip">
+  <div class="track" id="offerTrack"></div>
+</div>
 
 <!-- ======================= HERO ======================= -->
 <section class="hero">
   <div class="wrap">
-    <h1>Naya Mobile, Ghar Baithay — Bina Advance</h1>
-    <p>Wah Cantt aur Basti ki dono shops se — asal mobile, poori guarantee, aur har khareedari par ek pyara sa gift.</p>
+    <h1>New Mobile, Delivered to Your Door — No Advance Payment</h1>
+    <p>Shop from our Wah Cantt and Basti locations. Order online and pay only when the phone is delivered or when you collect it from the shop.</p>
     <div class="hero-badges">
-      <span class="badge">✔ Advance Nahi</span>
-      <span class="badge">🚚 Wah Cantt Free Delivery (24 Hours)</span>
-      <span class="badge">🎁 Har Mobile Ke Sath Gift</span>
-      <span class="badge">📆 Installments Available</span>
+      <span class="badge">✔ No Advance Payment</span>
+      <span class="badge">🚚 Free Wah Cantt Delivery</span>
+      <span class="badge">🎁 Free Gift with Selected Phones</span>
+      <span class="badge">📆 Installment Options Available</span>
     </div>
     <div class="hero-cta">
-      <a class="btn btn-gold" href="#phones">Mobiles Dekhein</a>
-      <a class="btn btn-outline" href="https://wa.me/923068988411" target="_blank" rel="noopener">WhatsApp Par Poochein</a>
+      <a class="btn btn-gold" href="#phones">View Mobiles</a>
+      <a class="btn btn-outline" href="tel:+923390011126">Call Us</a>
     </div>
   </div>
 </section>
@@ -270,31 +261,11 @@
   <div class="wrap">
     <div class="section-head">
       <h2>Available Mobiles</h2>
-      <p>Jo mobile pasand aaye, tap kar ke tafseel dekhein aur seedha order karein.</p>
+      <p>Choose a model, compare its variants and specs, then place your order on the website. Pay at delivery or at shop pickup.</p>
     </div>
-
-    <div class="filter-bar">
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder="Mobile ya company search karein..." oninput="onSearch(this.value)">
-      </div>
-      <div class="chips" id="categoryChips"></div>
-      <div class="select-row">
-        <select id="companyFilter" onchange="onCompanyChange(this.value)">
-          <option value="all">Sari Companies</option>
-        </select>
-        <select id="priceFilter" onchange="onPriceChange(this.value)">
-          <option value="all">Sab Prices</option>
-          <option value="0-30000">0 – 30,000</option>
-          <option value="30000-60000">30,000 – 60,000</option>
-          <option value="60000-100000">60,000 – 100,000</option>
-          <option value="100000-999999999">100,000+</option>
-        </select>
-      </div>
-    </div>
-
     <div id="loadingNote" class="empty-note">Phones load ho rahe hain...</div>
     <div class="grid" id="productGrid"></div>
-    <div class="empty-note" id="emptyNote" style="display:none;">Is filter ke mutabiq koi mobile nahi mila.</div>
+    <div class="empty-note" id="emptyNote" style="display:none;">No mobiles are listed right now. Please check again soon.</div>
   </div>
 </section>
 
@@ -302,10 +273,26 @@
 <section class="section" style="padding-top:0;">
   <div class="wrap">
     <div class="why-grid">
-      <div class="why-card"><div class="ic">🚫💳</div><h3>Koi Advance Nahi</h3><p>Khareedari ke waqt kisi bhi qisam ka advance payment nahi — poora bharosa aap par.</p></div>
-      <div class="why-card"><div class="ic">🏍️</div><h3>Free Home Delivery</h3><p>Wah Cantt ke andar 24 ghanton mein mobile aapke ghar — bilkul free.</p></div>
-      <div class="why-card"><div class="ic">🎁</div><h3>Har Mobile Ke Sath Gift</h3><p>Watch, power bank aur bhi bohot kuch — limited time offer, jab tak stock hai.</p></div>
-      <div class="why-card"><div class="ic">📆</div><h3>Installments Available</h3><p>Aasan qiston mein bhi mobile le sakte hain — tafseel ke liye WhatsApp/call karein.</p></div>
+      <div class="why-card">
+        <div class="ic">🚫💳</div>
+        <h3>No Advance Payment</h3>
+        <p>No advance payment is required. Pay when you receive the phone or collect it from the shop.</p>
+      </div>
+      <div class="why-card">
+        <div class="ic">🏍️</div>
+        <h3>Free Home Delivery</h3>
+        <p>Free delivery is available within Wah Cantt, subject to the store's delivery coverage.</p>
+      </div>
+      <div class="why-card">
+        <div class="ic">🎁</div>
+        <h3>Free Gift on Selected Phones</h3>
+        <p>Gift availability may vary by model and current stock.</p>
+      </div>
+      <div class="why-card">
+        <div class="ic">📆</div>
+        <h3>Installment Options</h3>
+        <p>Installment availability and terms may vary by model. Contact the store for details.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -313,19 +300,22 @@
 <!-- ======================= SHOPS ======================= -->
 <section class="shops">
   <div class="wrap" style="padding:38px 0;">
-    <div class="section-head"><h2>Hamari Shops</h2><p>Khud aa kar mobile dekhna chahein to dono locations mein se kisi bhi ek par tashreef layein.</p></div>
+    <div class="section-head">
+      <h2>Our Shops</h2>
+      <p>Visit either location if you prefer to inspect the phone before purchase.</p>
+    </div>
     <div class="shop-grid">
       <div class="shop-card">
         <span class="tag">Shop 1 — Wah Cantt</span>
         <h3>26 Mart Mobiles</h3>
         <address>Sabri Street, Masjid-e-Ghousia ke qareeb, Wah Cantt</address>
-        <a class="btn btn-gold btn-sm" href="https://wa.me/923068988411" target="_blank" rel="noopener">WhatsApp Karein</a>
+        <a class="btn btn-gold" href="https://wa.me/923068988411" target="_blank" rel="noopener">Call Shop</a>
       </div>
       <div class="shop-card">
         <span class="tag">Shop 2 — Basti</span>
         <h3>Madina Communication</h3>
         <address>Izzat Ali Shah Plaza, Goal Chowk, Basti</address>
-        <a class="btn btn-gold btn-sm" href="https://wa.me/923068988411" target="_blank" rel="noopener">WhatsApp Karein</a>
+        <a class="btn btn-gold" href="https://wa.me/923068988411" target="_blank" rel="noopener">Call Shop</a>
       </div>
     </div>
   </div>
@@ -334,8 +324,8 @@
 <!-- ======================= CONTACT CTA ======================= -->
 <section class="section contact-cta">
   <div class="wrap">
-    <h2>Sawal Hai? Seedha Rabta Karein</h2>
-    <p>Price, stock ya installment ki tafseel ke liye kisi bhi waqt message ya call karein.</p>
+    <h2>Need Help? Contact Us</h2>
+    <p>For price, stock or order questions, call us or use the website order form.</p>
     <div class="hero-cta">
       <a class="btn btn-gold" href="https://wa.me/923068988411" target="_blank" rel="noopener">💬 WhatsApp: 0306-8988411</a>
       <a class="btn btn-outline" href="tel:+923390011126">📞 Call: 0339-0011126</a>
@@ -346,14 +336,20 @@
 <!-- ======================= OTHER SITES ======================= -->
 <section class="section" id="otherSitesSection" style="display:none;">
   <div class="wrap">
-    <div class="section-head"><h2>Hamari Dusri Websites</h2><p>26 Mart ke doosre platforms bhi dekhein.</p></div>
+    <div class="section-head">
+      <h2>Our Other Websites</h2>
+      <p>Explore our other platforms.</p>
+    </div>
     <div class="other-sites" id="otherSitesList"></div>
   </div>
 </section>
 
 <!-- ======================= FOOTER ======================= -->
 <footer>
-  <div class="wrap">26 Mart Mobiles — Wah Cantt &amp; Basti &nbsp;|&nbsp; <a href="#" onclick="openAdminGate(); return false;">Admin</a></div>
+  <div class="wrap">
+    26 Mart Mobiles — Wah Cantt &amp; Basti &nbsp;|&nbsp;
+    <a href="#" onclick="openAdminGate(); return false;">Admin</a>
+  </div>
 </footer>
 
 <a class="float-wa" href="https://wa.me/923068988411" target="_blank" rel="noopener" title="WhatsApp">
@@ -362,139 +358,70 @@
   </svg>
 </a>
 
-<!-- ======================= NOTIFICATION PANEL ======================= -->
-<div class="notif-panel" id="notifPanel"></div>
+<!-- Product detail modal -->
+<div class="modal" id="productModal"><div class="modal-box"><button class="modal-close" onclick="closeModal('productModal')">×</button><div id="productModalBody"></div></div></div>
+<!-- Image viewer -->
+<div class="modal" id="imageModal"><div class="modal-box" style="max-width:900px;text-align:center"><button class="modal-close" onclick="closeModal('imageModal')">×</button><img id="fullImage" class="detail-image" style="cursor:default;max-height:80vh" alt="Full product image"></div></div>
+<!-- Order modal -->
+<div class="modal" id="orderModal"><div class="modal-box"><button class="modal-close" onclick="closeModal('orderModal')">×</button><h2>Place Your Order</h2><p id="orderProductName" style="color:var(--muted)"></p><form id="orderForm" onsubmit="submitOrder(event)"><div class="form-grid"><input id="oName" required placeholder="Full name"><input id="oPhone" required type="tel" placeholder="Phone number"><input id="oArea" required placeholder="Area / sector"><textarea id="oAddress" class="full" required placeholder="Delivery address"></textarea><select id="oPayment" class="full" required><option value="">Select payment method</option><option>Cash on Delivery</option><option>Pay at Shop Pickup</option></select></div><button class="save-btn" type="submit">Confirm Order</button><div id="orderMsg" class="admin-msg"></div></form></div></div>
+<!-- Login/signup modal -->
+<div class="modal" id="authModal"><div class="modal-box" style="max-width:420px"><button class="modal-close" onclick="closeModal('authModal')">×</button><h2 id="authTitle">Login</h2><form onsubmit="submitAuth(event)"><input id="authEmail" type="email" required placeholder="Email" style="width:100%;padding:10px;margin-bottom:10px;border:1px solid var(--line);border-radius:8px"><input id="authPassword" type="password" minlength="6" required placeholder="Password (minimum 6 characters)" style="width:100%;padding:10px;margin-bottom:10px;border:1px solid var(--line);border-radius:8px"><button class="save-btn" type="submit" id="authSubmit">Login</button><div id="authMsg" class="admin-msg"></div></form><button class="small-btn" style="margin-top:8px" onclick="toggleAuthMode()">Switch Login / Sign Up</button></div></div>
 
-<!-- ======================= PRODUCT DETAIL MODAL ======================= -->
-<div class="overlay" id="detailOverlay">
-  <div class="sheet">
-    <button class="sheet-close" onclick="closeDetail()">&times;</button>
-    <img id="detailImg">
-    <div id="detailGiftFlag" style="display:none; color:var(--gold-dark); font-weight:700; font-size:12.5px; margin-bottom:4px;">🎁 Iske sath free gift</div>
-    <div id="detailCompany" style="font-size:11px; color:var(--muted); text-transform:uppercase;"></div>
-    <h3 id="detailName"></h3>
-    <div class="price-row" id="detailPriceRow"></div>
-    <div id="detailStockLine" style="font-size:13px; color:var(--muted); margin-top:4px;"></div>
-
-    <div id="detailVariantWrap" style="display:none; margin-top:10px;">
-      <div style="font-size:13px; color:var(--muted); font-weight:600; margin-bottom:6px;">Variant chunein:</div>
-      <div id="detailVariantOptions"></div>
-    </div>
-
-    <ul class="spec-list" id="detailSpecs"></ul>
-
-    <a class="btn btn-gold" id="detailOrderBtn" style="width:100%; justify-content:center; margin-top:12px;" target="_blank" rel="noopener">Order Now</a>
-    <div class="detail-msg" id="detailMsg"></div>
-  </div>
-</div>
-
-<!-- ======================= SIGNUP MODAL ======================= -->
-<div class="overlay" id="signupOverlay">
-  <div class="sheet" style="max-width:360px;">
-    <button class="sheet-close" onclick="closeSignup()">&times;</button>
-    <h3>Sign Up</h3>
-    <p style="font-size:12.5px; color:var(--muted); margin:0 0 12px;">Naye mobiles aur offers ki update sabse pehle payein.</p>
-    <div class="form-field"><label>Naam</label><input type="text" id="suName" placeholder="Aap ka naam"></div>
-    <div class="form-field"><label>WhatsApp Number</label><input type="text" id="suPhone" placeholder="03XXXXXXXXX"></div>
-    <button class="btn btn-gold" style="width:100%; justify-content:center;" onclick="submitSignup()">Sign Up Karein</button>
-    <div class="detail-msg" id="signupMsg"></div>
-  </div>
-</div>
-
-<!-- ======================= ADMIN PIN GATE ======================= -->
+<!-- ======================= ADMIN GATE ======================= -->
 <div class="admin-gate" id="adminGate">
   <div class="admin-box">
-    <h3>Admin Login</h3>
-    <input type="password" id="adminPin" placeholder="PIN darj karein" inputmode="numeric">
+    <h3>Admin Access</h3>
+    <p style="font-size:13px;color:var(--muted)">Please sign in with an authorized Firebase admin account, then open this panel.</p>
+    <button class="go" style="width:100%;margin-bottom:8px" onclick="openAuthModal('login');closeAdminGate()">Login / Sign Up</button>
     <div class="admin-err" id="adminErr"></div>
-    <div class="row"><button class="cancel" onclick="closeAdminGate()">Cancel</button><button class="go" onclick="checkAdminPin()">Login</button></div>
+    <div class="row">
+      <button class="cancel" onclick="closeAdminGate()">Cancel</button>
+      <button class="go" onclick="checkAdminPin()">Continue</button>
+    </div>
   </div>
 </div>
 
 <!-- ======================= ADMIN PANEL ======================= -->
 <section id="adminPanel">
   <div class="wrap">
-    <div class="section-head"><h2>Admin Panel</h2><p>Mobiles, announcements aur bulk-add yahan se manage karein.</p></div>
-    <div class="demo-banner" id="demoBanner" style="display:none;">Demo mode: Firebase abhi set nahi hua, is liye yeh data sirf test ke liye hai.</div>
-
-    <div class="admin-tabs">
-      <button class="admin-tab-btn active" onclick="switchAdminTab('single')" data-tab="single">Ek Mobile Add/Edit</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('bulk')" data-tab="bulk">Bulk Add</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('announce')" data-tab="announce">Announcements</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('list')" data-tab="list">Sab Mobiles</button>
+    <div class="section-head">
+      <h2>Admin Panel</h2>
+      <p>Manage products, variants, announcements, featured phones and orders.</p>
+    </div>
+    <div class="demo-banner" id="demoBanner" style="display:none;">
+      Demo mode: Firebase abhi set nahi hua, is liye yeh data sirf test ke liye hai — GitHub Pages par publish karne par save nahi hoga. Handover guide mein Firebase setup ka tareeqa dekhein.
     </div>
 
-    <!-- Single add/edit -->
-    <div class="admin-tab-pane active" id="pane-single">
-      <div class="admin-form">
-        <div class="f-row">
-          <div><label>Mobile ka naam</label><input type="text" id="fName" placeholder="Samsung A15"></div>
-          <div><label>Company</label><input type="text" id="fCompany" placeholder="Samsung"></div>
-        </div>
-        <div class="f-row">
-          <div><label>Category</label><input type="text" id="fCategory" placeholder="Smartphone"></div>
-          <div><label>Image file naam</label><input type="text" id="fImage" placeholder="images/samsung-a15.jpg"></div>
-        </div>
-        <div class="f-row">
-          <div><label>Original Price (kata hua rate)</label><input type="number" id="fOriginalPrice" min="0" placeholder="48000"></div>
-          <div><label>Sale Price (asal price)</label><input type="number" id="fPrice" min="0" placeholder="45000"></div>
-        </div>
-        <div class="f-row">
-          <div><label>Quantity (agar variants nahi hain)</label><input type="number" id="fQty" min="0" placeholder="5"></div>
-          <div><label><input type="checkbox" id="fGift" style="width:auto; margin-right:6px;">Free gift flag dikhayein</label></div>
-        </div>
-        <label>Specifications (har line par ek: Label: Value)</label>
-        <textarea id="fSpecs" rows="4" placeholder="RAM: 4GB
-Storage: 128GB
-Camera: 50MP
-Battery: 5000mAh"></textarea>
-
-        <label style="margin-top:14px;">Variants (optional — har variant ki apni price/stock)</label>
-        <div id="variantFields"></div>
-        <button class="admin-tab-btn" style="margin-top:6px;" type="button" onclick="addVariantField()">+ Variant Add Karein</button>
-
-        <div>
-          <button class="save-btn" onclick="saveSinglePhone()" id="singleSaveBtn">Mobile Add Karein</button>
-          <button class="cancel-edit-btn" id="cancelEditBtn" style="display:none;" onclick="cancelEdit()">Cancel Edit</button>
-        </div>
-        <div class="admin-msg" id="adminMsg"></div>
+    <div class="admin-form">
+      <div class="f-row">
+        <div><label>Model family / main name</label><input type="text" id="fBaseName" placeholder="Spark Go 3"></div>
+        <div><label>Variant</label><input type="text" id="fVariant" placeholder="4GB / 128GB"></div>
       </div>
-    </div>
-
-    <!-- Bulk add -->
-    <div class="admin-tab-pane" id="pane-bulk">
-      <div class="admin-form">
-        <div class="help-note">
-          Har line = ek mobile. Fields ko <b>|</b> (pipe) se alag karein, is tarteeb mein:<br>
-          <code>Naam | Company | Category | Original Price | Sale Price | Quantity | Image path | Gift(yes/no) | Specs(; se alag) | Variants(naam:price:qty, comma se alag)</code><br><br>
-          Misaal:<br>
-          <code>Samsung A15 | Samsung | Smartphone | 48000 | 45000 | 10 | images/samsung-a15.jpg | yes | RAM: 4GB; Storage: 128GB | 128GB:45000:6,256GB:52000:4</code><br><br>
-          Agar variants ya specs ya gift nahi dene, us jagah khali chhor dein lekin pipe zaroor rakhein.
-        </div>
-        <textarea id="bulkInput" rows="8" placeholder="Yahan multiple lines paste karein..."></textarea>
-        <button class="save-btn" onclick="bulkAddPhones()">Sab Add Karein</button>
-        <div class="admin-msg" id="bulkMsg"></div>
+      <div class="f-row">
+        <div><label>Display name</label><input type="text" id="fName" placeholder="Spark Go 3 4GB/128GB"></div>
+        <div><label>Sale price (Rs.)</label><input type="number" id="fPrice" min="0" placeholder="45000"></div>
       </div>
-    </div>
-
-    <!-- Announcements -->
-    <div class="admin-tab-pane" id="pane-announce">
-      <div class="admin-form">
-        <label>Naya announcement (offer, naya stock waghera)</label>
-        <input type="text" id="announceInput" placeholder="Masalan: Eid Sale! Sab mobiles par extra discount.">
-        <button class="save-btn" onclick="addAnnouncement()">Announcement Add Karein</button>
-        <div class="admin-msg" id="announceMsg"></div>
-        <ul class="announce-list" id="announceAdminList"></ul>
+      <div class="f-row">
+        <div><label>Before-discount price (Rs.)</label><input type="number" id="fOldPrice" min="0" placeholder="50000"></div>
+        <div><label>Quantity (stock)</label><input type="number" id="fQty" min="0" placeholder="5"></div>
       </div>
+      <div class="f-row">
+        <div><label>Image path / URL</label><input type="text" id="fImage" placeholder="images/spark-go-3.jpg"></div>
+        <div><label>Specifications</label><input type="text" id="fSpecs" placeholder="RAM, storage, display, camera, battery..."></div>
+      </div>
+      <div class="f-row"><div><label><input type="checkbox" id="fGift" style="width:auto;margin-right:6px;"> Free gift</label></div><div><label><input type="checkbox" id="fFeatured" style="width:auto;margin-right:6px;"> Show at top</label></div></div>
+      <button class="save-btn" onclick="addPhone()">Add Mobile / Variant</button><div class="admin-msg" id="adminMsg"></div>
+    </div>
+    <div class="admin-form">
+      <label>Website announcement</label><input type="text" id="announcementInput" placeholder="Example: Eid Sale — Up to Rs. 5,000 off selected phones"><button class="save-btn" onclick="saveAnnouncement()">Save Announcement</button><div class="admin-msg" id="announcementMsg"></div>
     </div>
 
-    <!-- List -->
-    <div class="admin-tab-pane" id="pane-list">
-      <table class="admin-table">
-        <thead><tr><th>Image</th><th>Naam</th><th>Price</th><th>Qty</th><th></th></tr></thead>
-        <tbody id="adminTableBody"></tbody>
-      </table>
-    </div>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Image</th><th>Model / Variant</th><th>Sale</th><th>Before</th><th>Qty</th><th>Featured</th><th></th></tr>
+      </thead>
+      <tbody id="adminTableBody"></tbody>
+    </table>
 
     <button class="close-admin" onclick="closeAdminPanel()">Admin Panel Band Karein</button>
   </div>
@@ -502,25 +429,36 @@ Battery: 5000mAh"></textarea>
 
 <script>
 /* =========================================================================
-   CONFIG
+   CONFIG — YEH HISSA AAP KHUD EDIT KAR SAKTE HAIN
    ========================================================================= */
-const ADMIN_PIN = "26251112"; // isay badal dein
 
+// Offer strip mein ghoomne wale messages
 const OFFER_MESSAGES = [
   "✔ Koi Advance Payment Nahi",
   "🚚 Wah Cantt Mein Free Home Delivery — 24 Ghanton Mein",
   "🎁 Har Mobile Ke Sath Free Gift (Watch / Power Bank aur bohot kuch)",
-  "📆 Aasan Installments Available",
+  "📆 Aasan Installment Options",
   "⏰ Limited Time Offer — Jald Order Karein"
 ];
 
+// "Our Other Websites" links — yahan apni doosri websites ke links add karein
+// Misaal: {name:"26 Mart Fashion", url:"https://username.github.io/26mart-fashion"}
 const OTHER_SITES = [
   // {name:"26 Mart Fashion", url:"https://example.com"},
 ];
 
+// WhatsApp / call numbers (agar badalne hon to yahan bhi update karein)
 const WHATSAPP_NUMBER = "923068988411";
 const CALL_NUMBER = "923390011126";
 
+// Admin access is controlled ONLY by Firebase Auth UID(s) here — the real
+// enforcement lives in firestore.rules on the server, this list is just
+// what the admin panel UI checks against for the logged-in user.
+const ADMIN_UIDS = ["vi8TxzARJpaM746urZnoqbY18Nv1"];
+
+// ---- FIREBASE CONFIG ----
+// Apna Firebase project banane ke baad, yahan apni config paste karein.
+// Jab tak apiKey "YOUR_API_KEY" hi hai, website automatically "demo mode" mein chalegi.
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCLQC43QlH0RbByCXH2kHIoZD5YXBVchb4",
   authDomain: "website-26mart.firebaseapp.com",
@@ -531,564 +469,89 @@ const FIREBASE_CONFIG = {
 };
 
 /* =========================================================================
-   STATE
+   ENGINE — is hisse ko chhairne ki zaroorat nahi
    ========================================================================= */
+
 let phones = [];
-let announcements = [];
-let subscribers = [];
 let usingFirebase = false;
 let db = null;
-let editingId = null;
-let searchQuery = '';
-let activeCategory = 'all';
-let activeCompany = 'all';
-let activePriceRange = 'all';
-let modalPhone = null;
-let modalSelectedVariant = null;
+let auth = null;
+let authMode = 'login';
+let selectedPhone = null;
+let selectedFamily = [];
 
-function isFirebaseConfigured(){ return FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY"; }
-function escapeHtml(s){ const d=document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
-function fmtPrice(n){ return 'Rs. ' + Number(n||0).toLocaleString('en-PK'); }
+function isFirebaseConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY'); }
+function safeNum(v){ const n=Number(v); return Number.isFinite(n)?n:0; }
+function fmtPrice(n){ return 'Rs. ' + safeNum(n).toLocaleString('en-PK'); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML; }
+function normalizeFamily(p){ return String(p.baseName || p.name || '').trim().toLowerCase().replace(/\s+/g,' '); }
+function familyName(p){ return p.baseName || String(p.name||'').replace(/\s+(\d+GB|\d+GB\/\d+GB|\d+\/\d+|\d+GB\s*RAM|\d+GB\s*ROM).*$/i,'').trim() || p.name; }
+function waLink(phone){ return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello, I am interested in '+phone.name+' ('+fmtPrice(phone.price)+').')}`; }
 
-/* =========================================================================
-   STORAGE INIT
-   ========================================================================= */
 async function initStorage(){
   if(isFirebaseConfigured()){
     try{
-      firebase.initializeApp(FIREBASE_CONFIG);
-      db = firebase.firestore();
-      usingFirebase = true;
-
-      db.collection("phones").onSnapshot(snap=>{
-        phones = snap.docs.map(d=>({id:d.id, ...d.data()}));
-        buildFilterOptions();
-        renderShop();
-        renderAdminTable();
-      });
-      db.collection("announcements").orderBy("ts","desc").onSnapshot(snap=>{
-        announcements = snap.docs.map(d=>({id:d.id, ...d.data()}));
-        renderAnnouncements();
-      });
-      db.collection("subscribers").onSnapshot(snap=>{
-        subscribers = snap.docs.map(d=>({id:d.id, ...d.data()}));
-      });
+      firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore(); auth=firebase.auth(); usingFirebase=true;
+      db.collection('phones').onSnapshot(snap=>{ phones=snap.docs.map(d=>({id:d.id,...d.data()})); renderShop(); renderAdminTable(); }, err=>{ console.error(err); document.getElementById('loadingNote').textContent='Unable to load products. Please try again.'; });
+      db.collection('settings').doc('site').onSnapshot(doc=>{ const a=doc.exists?(doc.data().announcement||''):''; renderOfferStrip(a); document.getElementById('announcementInput').value=a; });
+      auth.onAuthStateChanged(user=>{ const st=document.getElementById('userStatus'); st.textContent=user?`Signed in: ${user.email}`:''; });
       return;
     }catch(e){ console.error(e); }
   }
-  usingFirebase = false;
-  document.getElementById('demoBanner').style.display = 'block';
-  try{
-    const res = await window.storage.get('mart26-phones', true);
-    phones = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ phones = []; }
-  try{
-    const res2 = await window.storage.get('mart26-announcements', true);
-    announcements = res2 && res2.value ? JSON.parse(res2.value) : [];
-  }catch(e){ announcements = []; }
-  try{
-    const res3 = await window.storage.get('mart26-subscribers', true);
-    subscribers = res3 && res3.value ? JSON.parse(res3.value) : [];
-  }catch(e){ subscribers = []; }
-  buildFilterOptions();
-  renderShop();
-  renderAdminTable();
-  renderAnnouncements();
+  usingFirebase=false; document.getElementById('demoBanner').style.display='block'; renderOfferStrip(''); renderShop(); renderAdminTable();
 }
-
-async function persistPhonesDemo(){ if(!usingFirebase) await window.storage.set('mart26-phones', JSON.stringify(phones), true); }
-async function persistAnnouncementsDemo(){ if(!usingFirebase) await window.storage.set('mart26-announcements', JSON.stringify(announcements), true); }
-async function persistSubscribersDemo(){ if(!usingFirebase) await window.storage.set('mart26-subscribers', JSON.stringify(subscribers), true); }
-
-/* =========================================================================
-   OFFER STRIP / OTHER SITES
-   ========================================================================= */
-function renderOfferStrip(){
-  const track = document.getElementById('offerTrack');
-  const items = OFFER_MESSAGES.map(m=>`<span>${escapeHtml(m)}</span>`).join('');
-  track.innerHTML = items + items;
-}
-function renderOtherSites(){
-  if(!OTHER_SITES.length) return;
-  document.getElementById('otherSitesSection').style.display = 'block';
-  document.getElementById('otherSitesList').innerHTML = OTHER_SITES.map(s=>`<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.name)}</a>`).join('');
-}
-
-/* =========================================================================
-   ANNOUNCEMENTS
-   ========================================================================= */
-function renderAnnouncements(){
-  const bar = document.getElementById('announceBar');
-  const text = document.getElementById('announceText');
-  if(announcements.length){
-    bar.style.display = 'block';
-    text.textContent = '📢 ' + announcements[0].text;
-  }else{
-    bar.style.display = 'none';
-  }
-  const badge = document.getElementById('notifBadge');
-  if(announcements.length){ badge.style.display='flex'; badge.textContent = announcements.length; }
-  else{ badge.style.display='none'; }
-
-  const panel = document.getElementById('notifPanel');
-  if(announcements.length===0){
-    panel.innerHTML = '<div class="notif-empty">Abhi koi announcement nahi.</div>';
-  }else{
-    panel.innerHTML = announcements.map(a=>`<div class="notif-item">${escapeHtml(a.text)}</div>`).join('');
-  }
-
-  const adminList = document.getElementById('announceAdminList');
-  if(adminList){
-    adminList.innerHTML = announcements.map(a=>`<li><span>${escapeHtml(a.text)}</span><button class="del" onclick="deleteAnnouncement('${a.id}')">Delete</button></li>`).join('');
-  }
-}
-function toggleNotifications(){ document.getElementById('notifPanel').classList.toggle('show'); }
-async function addAnnouncement(){
-  const input = document.getElementById('announceInput');
-  const val = input.value.trim();
-  const msg = document.getElementById('announceMsg');
-  if(!val){ msg.className='admin-msg err'; msg.textContent='Message likhein.'; return; }
-  if(usingFirebase){
-    await db.collection('announcements').add({text:val, ts: Date.now()});
-  }else{
-    announcements.unshift({id:'an_'+Date.now(), text:val, ts:Date.now()});
-    await persistAnnouncementsDemo();
-    renderAnnouncements();
-  }
-  input.value = '';
-  msg.className='admin-msg ok'; msg.textContent='Announcement add ho gaya.';
-}
-async function deleteAnnouncement(id){
-  if(usingFirebase){ await db.collection('announcements').doc(id).delete(); }
-  else{
-    announcements = announcements.filter(a=>a.id!==id);
-    await persistAnnouncementsDemo();
-    renderAnnouncements();
-  }
-}
-
-/* =========================================================================
-   SIGNUP
-   ========================================================================= */
-function openSignup(){ document.getElementById('signupOverlay').classList.add('show'); document.getElementById('signupMsg').textContent=''; }
-function closeSignup(){ document.getElementById('signupOverlay').classList.remove('show'); }
-async function submitSignup(){
-  const name = document.getElementById('suName').value.trim();
-  const phone = document.getElementById('suPhone').value.trim();
-  const msg = document.getElementById('signupMsg');
-  if(!name || !phone){ msg.className='detail-msg err'; msg.textContent='Naam aur number likhein.'; return; }
-  const entry = {name, phone, ts: Date.now()};
-  try{
-    if(usingFirebase){ await db.collection('subscribers').add(entry); }
-    else{ subscribers.push(entry); await persistSubscribersDemo(); }
-  }catch(e){ msg.className='detail-msg err'; msg.textContent='Kuch masla hua, dobara koshish karein.'; return; }
-  msg.className='detail-msg'; msg.style.color='var(--green)'; msg.textContent='Sign up ho gaya! Shukriya.';
-  document.getElementById('suName').value=''; document.getElementById('suPhone').value='';
-  setTimeout(closeSignup, 1200);
-}
-
-/* =========================================================================
-   FILTERS
-   ========================================================================= */
-function buildFilterOptions(){
-  const categories = [...new Set(phones.map(p=>p.category).filter(Boolean))];
-  const companies = [...new Set(phones.map(p=>p.company).filter(Boolean))];
-
-  const chipsWrap = document.getElementById('categoryChips');
-  chipsWrap.innerHTML = '<button class="chip active" data-cat="all" onclick="onCategoryChange(\'all\')">Sab</button>' +
-    categories.map(c=>`<button class="chip" data-cat="${escapeHtml(c)}" onclick="onCategoryChange('${escapeHtml(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join('');
-
-  const companySel = document.getElementById('companyFilter');
-  const currentVal = companySel.value;
-  companySel.innerHTML = '<option value="all">Sari Companies</option>' + companies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  if(companies.includes(currentVal)) companySel.value = currentVal;
-}
-function onSearch(val){ searchQuery = val.trim().toLowerCase(); renderShop(); }
-function onCategoryChange(cat){
-  activeCategory = cat;
-  document.querySelectorAll('#categoryChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.cat===cat));
-  renderShop();
-}
-function onCompanyChange(val){ activeCompany = val; renderShop(); }
-function onPriceChange(val){ activePriceRange = val; renderShop(); }
-
-function displayPrice(p){
-  if(p.variants && p.variants.length){ return Math.min(...p.variants.map(v=>Number(v.price)||0)); }
-  return Number(p.price||0);
-}
-function totalStock(p){
-  if(p.variants && p.variants.length){ return p.variants.reduce((s,v)=>s+Number(v.stock||v.qty||0),0); }
-  return Number(p.qty||0);
-}
-function passesFilters(p){
-  if(searchQuery){
-    const hay = ((p.name||'')+' '+(p.company||'')).toLowerCase();
-    if(!hay.includes(searchQuery)) return false;
-  }
-  if(activeCategory!=='all' && p.category!==activeCategory) return false;
-  if(activeCompany!=='all' && p.company!==activeCompany) return false;
-  if(activePriceRange!=='all'){
-    const [lo,hi] = activePriceRange.split('-').map(Number);
-    const pr = displayPrice(p);
-    if(pr < lo || pr > hi) return false;
-  }
-  return true;
-}
-
-/* =========================================================================
-   SHOP GRID
-   ========================================================================= */
+function renderOfferStrip(announcement=''){ const track=document.getElementById('offerTrack'); const msgs=[announcement,...OFFER_MESSAGES].filter(Boolean); const items=msgs.map(m=>`<span>${escapeHtml(m)}</span>`).join(''); track.innerHTML=items+items; }
+function sortedPhones(){ return [...phones].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)); }
 function renderShop(){
-  document.getElementById('loadingNote').style.display = 'none';
-  const grid = document.getElementById('productGrid');
-  const empty = document.getElementById('emptyNote');
-  const filtered = phones.filter(passesFilters);
-  grid.innerHTML = '';
-  if(filtered.length===0){ empty.style.display='block'; return; }
-  empty.style.display='none';
-
-  filtered.forEach(p=>{
-    const stock = totalStock(p);
-    const inStock = stock > 0;
-    const hasVariants = p.variants && p.variants.length>0;
-    const price = displayPrice(p);
-    const showOld = !hasVariants && p.originalPrice && Number(p.originalPrice) > Number(p.price);
-
-    const card = document.createElement('div');
-    card.className = 'pcard';
-    card.onclick = ()=>openDetail(p.id);
-    card.innerHTML = `
-      ${p.gift ? '<div class="gift-flag">🎁 Free Gift</div>' : ''}
-      <div class="imgwrap">
-        ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.innerHTML='<div class=&quot;noimg&quot;>Tasveer nahi mili</div>'">` : '<div class="noimg">Tasveer nahi</div>'}
-      </div>
-      <div class="body">
-        ${p.company ? `<div class="pcompany">${escapeHtml(p.company)}</div>` : ''}
-        <p class="pname">${escapeHtml(p.name)}</p>
-        <div class="price-row">
-          ${showOld ? `<span class="price-old">${fmtPrice(p.originalPrice)}</span>` : ''}
-          <span class="price-new">${fmtPrice(price)}</span>
-          ${hasVariants ? '<span class="price-from">se shuru</span>' : ''}
-        </div>
-        <div class="stock-row ${inStock?'in':'out'}"><span class="dot ${inStock?'':'out'}"></span>${inStock ? 'Stock: '+stock+' available' : 'Stock Khatam'}</div>
-        <button class="order-btn ${inStock?'':'disabled'}" onclick="event.stopPropagation(); openDetail('${p.id}');">Order Now</button>
-      </div>
-    `;
+  document.getElementById('loadingNote').style.display='none'; const grid=document.getElementById('productGrid'); const empty=document.getElementById('emptyNote'); grid.innerHTML='';
+  if(!phones.length){empty.style.display='block';return} empty.style.display='none';
+  const groups=new Map(); sortedPhones().forEach(p=>{const key=normalizeFamily(p); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(p);});
+  groups.forEach(group=>{
+    const p=group[0], inStock=group.some(x=>safeNum(x.qty)>0); const card=document.createElement('div'); card.className='pcard '+(group.some(x=>x.featured)?'featured':'');
+    const img=p.image?`<img src="${escapeHtml(p.image)}" alt="${escapeHtml(familyName(p))}" onerror="this.parentElement.innerHTML='<div class=&quot;noimg&quot;>Image unavailable</div>'">`:'<div class="noimg">No image</div>';
+    card.innerHTML=`${group.some(x=>x.featured)?'<div class="featured-label">★ Featured</div>':''}${p.gift?'<div class="gift-flag">🎁 Free Gift</div>':''}<div class="imgwrap">${img}</div><div class="body"><p class="pname">${escapeHtml(familyName(p))}</p><div><span class="old-price">${p.oldPrice?fmtPrice(p.oldPrice):''}</span><span class="sale-price">${fmtPrice(p.price)}</span></div><div class="stock-row ${inStock?'in':'out'}"><span class="dot ${inStock?'':'out'}"></span>${inStock?'Stock Available':'Out of Stock'}</div><div class="view-count">${safeNum(p.views)} total views</div><button class="order-btn" onclick="openProduct('${p.id}')">View Variants & Details</button></div>`;
     grid.appendChild(card);
   });
 }
-
-/* =========================================================================
-   PRODUCT DETAIL MODAL
-   ========================================================================= */
-function openDetail(id){
-  modalPhone = phones.find(p=>p.id===id);
-  if(!modalPhone) return;
-  modalSelectedVariant = null;
-
-  document.getElementById('detailImg').src = modalPhone.image || '';
-  document.getElementById('detailCompany').textContent = modalPhone.company || '';
-  document.getElementById('detailName').textContent = modalPhone.name;
-  document.getElementById('detailGiftFlag').style.display = modalPhone.gift ? 'block' : 'none';
-  document.getElementById('detailMsg').textContent = '';
-
-  const hasVariants = modalPhone.variants && modalPhone.variants.length>0;
-  const priceRow = document.getElementById('detailPriceRow');
-  const stockLine = document.getElementById('detailStockLine');
-  const variantWrap = document.getElementById('detailVariantWrap');
-  const variantOptions = document.getElementById('detailVariantOptions');
-  const orderBtn = document.getElementById('detailOrderBtn');
-
-  if(hasVariants){
-    priceRow.innerHTML = `<span class="price-new">${fmtPrice(Math.min(...modalPhone.variants.map(v=>Number(v.price)||0)))}</span><span class="price-from">se shuru</span>`;
-    stockLine.textContent = '';
-    variantWrap.style.display = 'block';
-    variantOptions.innerHTML = '';
-    modalPhone.variants.forEach(v=>{
-      const stock = Number(v.stock||v.qty||0);
-      const opt = document.createElement('div');
-      opt.className = 'variant-opt' + (stock<=0 ? ' disabled' : '');
-      opt.innerHTML = `<b>${escapeHtml(v.name)}</b><span>${fmtPrice(v.price)} ${stock<=0?'(khatam)':''}</span>`;
-      opt.onclick = ()=>{
-        if(stock<=0) return;
-        modalSelectedVariant = v;
-        document.querySelectorAll('#detailVariantOptions .variant-opt').forEach(o=>o.classList.remove('sel'));
-        opt.classList.add('sel');
-        updateOrderBtn();
-      };
-      variantOptions.appendChild(opt);
-    });
-    orderBtn.classList.add('disabled');
-    orderBtn.removeAttribute('href');
-  }else{
-    const showOld = modalPhone.originalPrice && Number(modalPhone.originalPrice) > Number(modalPhone.price);
-    priceRow.innerHTML = `${showOld ? `<span class="price-old">${fmtPrice(modalPhone.originalPrice)}</span>` : ''}<span class="price-new">${fmtPrice(modalPhone.price)}</span>`;
-    const stock = Number(modalPhone.qty||0);
-    stockLine.textContent = stock>0 ? 'Stock: '+stock+' available' : 'Stock Khatam';
-    variantWrap.style.display = 'none';
-    updateOrderBtn();
-  }
-
-  const specsList = document.getElementById('detailSpecs');
-  specsList.innerHTML = '';
-  if(modalPhone.specs){
-    modalPhone.specs.split('\n').map(s=>s.trim()).filter(Boolean).forEach(line=>{
-      const li = document.createElement('li'); li.textContent = line; specsList.appendChild(li);
-    });
-  }
-
-  document.getElementById('detailOverlay').classList.add('show');
+function openProduct(id){
+  const base=phones.find(p=>p.id===id); if(!base)return; selectedFamily=phones.filter(p=>normalizeFamily(p)===normalizeFamily(base)); selectedPhone=base; renderProductModal(); document.getElementById('productModal').classList.add('show'); incrementView(base.id);
 }
-function updateOrderBtn(){
-  const orderBtn = document.getElementById('detailOrderBtn');
-  const hasVariants = modalPhone.variants && modalPhone.variants.length>0;
-  let ok = false, price = modalPhone.price, variantName = '';
-  if(hasVariants){
-    if(modalSelectedVariant){ ok = Number(modalSelectedVariant.stock||modalSelectedVariant.qty||0)>0; price = modalSelectedVariant.price; variantName = modalSelectedVariant.name; }
-  }else{
-    ok = Number(modalPhone.qty||0)>0;
-  }
-  if(ok){
-    const msgText = `Assalam o Alaikum, mujhe ${modalPhone.name}${variantName?' ('+variantName+')':''} (${fmtPrice(price)}) mein interest hai. Kya yeh available hai?`;
-    orderBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msgText)}`;
-    orderBtn.classList.remove('disabled');
-  }else{
-    orderBtn.removeAttribute('href');
-    orderBtn.classList.add('disabled');
-  }
+function renderProductModal(){
+  const p=selectedPhone, variants=selectedFamily; const image=p.image?`<img class="detail-image" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onclick="openImage('${escapeHtml(p.image)}','${escapeHtml(p.name)}')">`:'<div class="detail-image noimg">No image available</div>';
+  document.getElementById('productModalBody').innerHTML=`<div class="detail-grid"><div>${image}</div><div><h2 style="margin-top:0">${escapeHtml(familyName(p))}</h2><div class="variant-list">${variants.map(v=>`<button class="variant-btn ${v.id===p.id?'active':''}" onclick="selectVariant('${v.id}')">${escapeHtml(v.variant||v.name)}</button>`).join('')}</div><h3>${escapeHtml(p.variant||p.name)}</h3><div><span class="old-price">${p.oldPrice?fmtPrice(p.oldPrice):''}</span><span class="sale-price">${fmtPrice(p.price)}</span></div><p class="stock-row ${safeNum(p.qty)>0?'in':'out'}">${safeNum(p.qty)>0?'Stock Available':'Out of Stock'}</p><div class="view-count">${safeNum(p.views)} total views</div><div class="specs">${escapeHtml(p.specs||'Specifications will be added soon.')}</div><div class="share-row"><button class="small-btn" onclick="shareProduct()">↗ Share</button><button class="small-btn" onclick="openImage('${escapeHtml(p.image||'')}','${escapeHtml(p.name)}')">⌕ Full Image</button>${safeNum(p.qty)>0?'<button class="small-btn" style="background:var(--green);color:#fff" onclick="openOrder()">Order Now</button>':''}</div></div></div>`;
 }
-function closeDetail(){ document.getElementById('detailOverlay').classList.remove('show'); }
+function selectVariant(id){ const p=selectedFamily.find(x=>x.id===id); if(p){selectedPhone=p;renderProductModal();incrementView(p.id);} }
+function openImage(src,alt){if(!src)return;document.getElementById('fullImage').src=src;document.getElementById('fullImage').alt=alt||'Product image';document.getElementById('imageModal').classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+async function shareProduct(){ const url=location.href.split('#')[0]+'#phone='+encodeURIComponent(selectedPhone.id); const data={title:selectedPhone.name,text:'Check out '+selectedPhone.name+' at 26 Mart Mobiles',url}; try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert('Product link copied.');}}catch(e){} }
+async function incrementView(id){ if(!usingFirebase)return; try{await db.collection('phones').doc(id).update({views:firebase.firestore.FieldValue.increment(1)});}catch(e){console.warn('View count failed',e);} }
+function openOrder(){ if(!selectedPhone)return; document.getElementById('orderProductName').textContent=`${selectedPhone.name} — ${fmtPrice(selectedPhone.price)}`; document.getElementById('orderMsg').textContent=''; document.getElementById('orderModal').classList.add('show'); }
+async function submitOrder(e){ e.preventDefault(); const msg=document.getElementById('orderMsg'); msg.className='admin-msg'; msg.textContent=''; const order={phoneId:selectedPhone.id,phoneName:selectedPhone.name,price:safeNum(selectedPhone.price),customerName:document.getElementById('oName').value.trim(),phone:document.getElementById('oPhone').value.trim(),area:document.getElementById('oArea').value.trim(),address:document.getElementById('oAddress').value.trim(),payment:document.getElementById('oPayment').value,createdAt:firebase.firestore?firebase.firestore.FieldValue.serverTimestamp():new Date().toISOString(),status:'new'}; if(!usingFirebase){msg.className='admin-msg ok';msg.textContent='Order form is ready, but Firebase is not connected yet.';return;} try{await db.collection('orders').add(order);msg.className='admin-msg ok';msg.textContent='Order received. No payment is required now. Pay at delivery or shop pickup.';document.getElementById('orderForm').reset();}catch(err){console.error(err);msg.className='admin-msg err';msg.textContent='Order could not be submitted. Please try again.';} }
 
-/* =========================================================================
-   ADMIN: GATE
-   ========================================================================= */
-function openAdminGate(){ document.getElementById('adminGate').classList.add('show'); document.getElementById('adminPin').value=''; document.getElementById('adminErr').textContent=''; }
-function closeAdminGate(){ document.getElementById('adminGate').classList.remove('show'); }
-function checkAdminPin(){
-  const val = document.getElementById('adminPin').value;
-  if(val === ADMIN_PIN){
-    closeAdminGate();
-    document.getElementById('adminPanel').style.display = 'block';
-    document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'});
-  }else{
-    document.getElementById('adminErr').textContent = 'Ghalat PIN, dobara koshish karein.';
-  }
+function openAuthModal(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'Login':'Create Account';document.getElementById('authSubmit').textContent=mode==='login'?'Login':'Sign Up';document.getElementById('authMsg').textContent='';document.getElementById('authModal').classList.add('show');}
+function toggleAuthMode(){openAuthModal(authMode==='login'?'signup':'login');}
+async function submitAuth(e){e.preventDefault();const msg=document.getElementById('authMsg');msg.className='admin-msg';msg.textContent='';if(!auth){msg.className='admin-msg err';msg.textContent='Account system is not connected. Please configure Firebase Authentication.';return;}const email=document.getElementById('authEmail').value.trim(),pass=document.getElementById('authPassword').value;try{if(authMode==='signup')await auth.createUserWithEmailAndPassword(email,pass);else await auth.signInWithEmailAndPassword(email,pass);msg.className='admin-msg ok';msg.textContent=authMode==='signup'?'Account created successfully.':'Logged in successfully.';setTimeout(()=>closeModal('authModal'),600);}catch(err){console.error(err);const map={'auth/email-already-in-use':'This email is already registered.','auth/invalid-email':'Please enter a valid email.','auth/weak-password':'Password must be at least 6 characters.','auth/invalid-credential':'Email or password is incorrect.'};msg.className='admin-msg err';msg.textContent=map[err.code]||'Something went wrong. Please check Firebase Authentication settings and try again.';}}
+
+function renderOtherSites(){if(!OTHER_SITES.length)return;document.getElementById('otherSitesSection').style.display='block';document.getElementById('otherSitesList').innerHTML=OTHER_SITES.map(s=>`<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.name)}</a>`).join('');}
+function openAdminGate(){document.getElementById('adminGate').classList.add('show');document.getElementById('adminErr').textContent='';}
+function closeAdminGate(){document.getElementById('adminGate').classList.remove('show');}
+function checkAdminPin(){ closeAdminGate(); showAdminIfAuthorized(); }
+function showAdminIfAuthorized(){ if(!auth||!auth.currentUser){openAuthModal('login');return;} if(!ADMIN_UIDS.includes(auth.currentUser.uid)){alert('Your account is not authorized for admin access.');return;} document.getElementById('adminPanel').style.display='block';document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'}); }
+function closeAdminPanel(){document.getElementById('adminPanel').style.display='none';window.scrollTo({top:0,behavior:'smooth'});}
+async function addPhone(){
+ const msg=document.getElementById('adminMsg');msg.className='admin-msg';msg.textContent=''; if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
+ const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
+ if(!baseName||!name||price<=0){msg.className='admin-msg err';msg.textContent='Model name and a valid sale price are required.';return;}
+ try{await db.collection('phones').add({baseName,variant,name,price,oldPrice,qty,image,specs,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';['fBaseName','fVariant','fName','fPrice','fOldPrice','fQty','fImage','fSpecs'].forEach(id=>document.getElementById(id).value='');document.getElementById('fGift').checked=false;document.getElementById('fFeatured').checked=false;}catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.';}
 }
-function closeAdminPanel(){ document.getElementById('adminPanel').style.display='none'; window.scrollTo({top:0, behavior:'smooth'}); }
-function switchAdminTab(tab){
-  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  document.querySelectorAll('.admin-tab-pane').forEach(p=>p.classList.remove('active'));
-  document.getElementById('pane-'+tab).classList.add('active');
-}
-
-/* =========================================================================
-   ADMIN: VARIANT FIELDS (single form)
-   ========================================================================= */
-let variantFieldCount = 0;
-function addVariantField(prefill){
-  variantFieldCount++;
-  const id = 'vf_'+variantFieldCount;
-  const wrap = document.createElement('div');
-  wrap.className = 'field-block';
-  wrap.id = id;
-  wrap.innerHTML = `
-    <button class="rm" type="button" onclick="document.getElementById('${id}').remove()">Remove</button>
-    <div style="clear:both;"></div>
-    <div class="f-row">
-      <div><label>Variant naam</label><input type="text" class="vname" placeholder="128GB / Red" value="${prefill?escapeHtml(prefill.name):''}"></div>
-      <div><label>Price</label><input type="number" class="vprice" min="0" value="${prefill?prefill.price:''}"></div>
-      <div><label>Stock</label><input type="number" class="vstock" min="0" value="${prefill?(prefill.stock!==undefined?prefill.stock:prefill.qty):''}"></div>
-    </div>
-  `;
-  document.getElementById('variantFields').appendChild(wrap);
-}
-
-/* =========================================================================
-   ADMIN: SINGLE ADD / EDIT
-   ========================================================================= */
-function fillFormForEdit(p){
-  editingId = p.id;
-  document.getElementById('fName').value = p.name||'';
-  document.getElementById('fCompany').value = p.company||'';
-  document.getElementById('fCategory').value = p.category||'';
-  document.getElementById('fImage').value = p.image||'';
-  document.getElementById('fOriginalPrice').value = p.originalPrice||'';
-  document.getElementById('fPrice').value = p.price||'';
-  document.getElementById('fQty').value = p.qty||0;
-  document.getElementById('fGift').checked = !!p.gift;
-  document.getElementById('fSpecs').value = p.specs||'';
-  document.getElementById('variantFields').innerHTML = '';
-  if(p.variants){ p.variants.forEach(v=>addVariantField(v)); }
-  document.getElementById('singleSaveBtn').textContent = 'Update Karein';
-  document.getElementById('cancelEditBtn').style.display = 'inline-block';
-  switchAdminTab('single');
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-function cancelEdit(){
-  editingId = null;
-  document.getElementById('fName').value='';
-  document.getElementById('fCompany').value='';
-  document.getElementById('fCategory').value='';
-  document.getElementById('fImage').value='';
-  document.getElementById('fOriginalPrice').value='';
-  document.getElementById('fPrice').value='';
-  document.getElementById('fQty').value='';
-  document.getElementById('fGift').checked=false;
-  document.getElementById('fSpecs').value='';
-  document.getElementById('variantFields').innerHTML='';
-  document.getElementById('singleSaveBtn').textContent = 'Mobile Add Karein';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-}
-
-async function saveSinglePhone(){
-  const msg = document.getElementById('adminMsg');
-  msg.className='admin-msg'; msg.textContent='';
-  const name = document.getElementById('fName').value.trim();
-  if(!name){ msg.className='admin-msg err'; msg.textContent='Naam likhein.'; return; }
-
-  const variantEls = document.querySelectorAll('#variantFields .field-block');
-  const variants = [];
-  variantEls.forEach(el=>{
-    const vname = el.querySelector('.vname').value.trim();
-    const vprice = Number(el.querySelector('.vprice').value||0);
-    const vstock = Number(el.querySelector('.vstock').value||0);
-    if(vname) variants.push({name:vname, price:vprice, stock:vstock});
-  });
-
-  const data = {
-    name,
-    company: document.getElementById('fCompany').value.trim(),
-    category: document.getElementById('fCategory').value.trim(),
-    image: document.getElementById('fImage').value.trim(),
-    originalPrice: Number(document.getElementById('fOriginalPrice').value||0),
-    price: Number(document.getElementById('fPrice').value||0),
-    qty: variants.length ? 0 : Number(document.getElementById('fQty').value||0),
-    gift: document.getElementById('fGift').checked,
-    specs: document.getElementById('fSpecs').value.trim(),
-    variants
-  };
-
-  try{
-    if(usingFirebase){
-      if(editingId){ await db.collection('phones').doc(editingId).update(data); }
-      else{ await db.collection('phones').add(data); }
-    }else{
-      if(editingId){
-        const idx = phones.findIndex(p=>p.id===editingId);
-        if(idx>-1) phones[idx] = {...phones[idx], ...data};
-      }else{
-        data.id = 'ph_'+Date.now();
-        phones.push(data);
-      }
-      await persistPhonesDemo();
-      buildFilterOptions();
-      renderShop();
-      renderAdminTable();
-    }
-  }catch(e){ msg.className='admin-msg err'; msg.textContent='Save nahi ho saka.'; return; }
-
-  msg.className='admin-msg ok'; msg.textContent = editingId ? 'Update ho gaya.' : 'Mobile add ho gaya.';
-  cancelEdit();
-}
-
-/* =========================================================================
-   ADMIN: BULK ADD
-   ========================================================================= */
-async function bulkAddPhones(){
-  const msg = document.getElementById('bulkMsg');
-  const raw = document.getElementById('bulkInput').value;
-  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
-  if(!lines.length){ msg.className='admin-msg err'; msg.textContent='Kam az kam ek line likhein.'; return; }
-
-  const newPhones = [];
-  lines.forEach(line=>{
-    const parts = line.split('|').map(s=>s.trim());
-    const [name, company, category, originalPrice, price, qty, image, gift, specs, variantsRaw] = parts;
-    if(!name) return;
-    let variants = [];
-    if(variantsRaw){
-      variants = variantsRaw.split(',').map(v=>v.trim()).filter(Boolean).map(v=>{
-        const [vn, vp, vs] = v.split(':').map(s=>s.trim());
-        return {name: vn||'', price: Number(vp||0), stock: Number(vs||0)};
-      }).filter(v=>v.name);
-    }
-    newPhones.push({
-      id: 'ph_'+Date.now()+'_'+Math.floor(Math.random()*10000),
-      name,
-      company: company||'',
-      category: category||'',
-      originalPrice: Number(originalPrice||0),
-      price: Number(price||0),
-      qty: variants.length ? 0 : Number(qty||0),
-      image: image||'',
-      gift: (gift||'').toLowerCase()==='yes',
-      specs: specs ? specs.split(';').map(s=>s.trim()).filter(Boolean).join('\n') : '',
-      variants
-    });
-  });
-
-  if(!newPhones.length){ msg.className='admin-msg err'; msg.textContent='Koi valid line nahi mili.'; return; }
-
-  try{
-    if(usingFirebase){
-      const batch = db.batch();
-      newPhones.forEach(p=>{
-        const {id, ...rest} = p;
-        const ref = db.collection('phones').doc();
-        batch.set(ref, rest);
-      });
-      await batch.commit();
-    }else{
-      phones.push(...newPhones);
-      await persistPhonesDemo();
-      buildFilterOptions();
-      renderShop();
-      renderAdminTable();
-    }
-  }catch(e){ msg.className='admin-msg err'; msg.textContent='Save nahi ho saka.'; return; }
-
-  msg.className='admin-msg ok'; msg.textContent = newPhones.length + ' mobiles add ho gaye.';
-  document.getElementById('bulkInput').value='';
-}
-
-/* =========================================================================
-   ADMIN: TABLE (list tab)
-   ========================================================================= */
-function renderAdminTable(){
-  const body = document.getElementById('adminTableBody');
-  body.innerHTML = '';
-  phones.forEach(p=>{
-    const stock = totalStock(p);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><img src="${escapeHtml(p.image||'')}"></td>
-      <td>${escapeHtml(p.name)}</td>
-      <td>${fmtPrice(displayPrice(p))}</td>
-      <td>${stock}</td>
-      <td>
-        <button class="edit" onclick='fillFormForEdit(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button>
-        <button class="del" onclick="deletePhone('${p.id}')">Delete</button>
-      </td>
-    `;
-    body.appendChild(tr);
-  });
-}
-async function deletePhone(id){
-  if(!confirm('Yeh mobile hata dein?')) return;
-  if(usingFirebase){ await db.collection('phones').doc(id).delete(); }
-  else{
-    phones = phones.filter(p=>p.id!==id);
-    await persistPhonesDemo();
-    buildFilterOptions();
-    renderShop();
-    renderAdminTable();
-  }
-}
+async function saveAnnouncement(){const msg=document.getElementById('announcementMsg');if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in as an authorized admin.';return;}try{await db.collection('settings').doc('site').set({announcement:document.getElementById('announcementInput').value.trim()},{merge:true});msg.className='admin-msg ok';msg.textContent='Announcement saved.';}catch(e){msg.className='admin-msg err';msg.textContent='Announcement could not be saved.';}}
+function renderAdminTable(){const body=document.getElementById('adminTableBody');if(!body)return;body.innerHTML='';phones.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td><img src="${escapeHtml(p.image||'')}"></td><td>${escapeHtml(p.baseName||p.name)}<br><small>${escapeHtml(p.variant||'')}</small></td><td><input type="text" value="${safeNum(p.price)}" data-field="price" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.oldPrice)}" data-field="oldPrice" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.qty)}" data-field="qty" data-id="${p.id}"></td><td><input type="checkbox" ${p.featured?'checked':''} data-field="featured" data-id="${p.id}"></td><td><button class="upd" onclick="updatePhone('${p.id}')">Update</button><button class="del" onclick="deletePhone('${p.id}')">Delete</button></td>`;body.appendChild(tr);});}
+async function updatePhone(id){if(!auth||!auth.currentUser){alert('Please login as admin.');return;}const price=safeNum(document.querySelector(`input[data-id="${id}"][data-field="price"]`).value),oldPrice=safeNum(document.querySelector(`input[data-id="${id}"][data-field="oldPrice"]`).value),qty=safeNum(document.querySelector(`input[data-id="${id}"][data-field="qty"]`).value),featured=document.querySelector(`input[data-id="${id}"][data-field="featured"]`).checked;try{await db.collection('phones').doc(id).update({price,oldPrice,qty,featured});}catch(e){alert('Update failed.');}}
+async function deletePhone(id){if(!auth||!auth.currentUser)return;if(!confirm('Delete this product?'))return;try{await db.collection('phones').doc(id).delete();}catch(e){alert('Delete failed.');}}
 
 /* ---------- Init ---------- */
-renderOfferStrip();
 renderOtherSites();
-initStorage();
+initStorage().then(()=>{ if(location.hash.startsWith('#phone=')){const id=decodeURIComponent(location.hash.slice(7));setTimeout(()=>openProduct(id),500);} });
 </script>
 </body>
 </html>
