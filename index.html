@@ -430,7 +430,9 @@
         <div><label>Category</label><input type="text" id="fCategory" placeholder="Smartphone"></div>
       </div>
       <div class="f-row"><div><label><input type="checkbox" id="fGift" style="width:auto;margin-right:6px;"> Free gift</label></div><div><label><input type="checkbox" id="fFeatured" style="width:auto;margin-right:6px;"> Show at top</label></div></div>
-      <button class="save-btn" onclick="addPhone()">Add Mobile / Variant</button><div class="admin-msg" id="adminMsg"></div>
+      <button class="save-btn" id="savePhoneBtn" onclick="addPhone()">Add Mobile / Variant</button>
+      <button class="save-btn" id="cancelEditBtn" style="display:none;background:var(--paper);color:var(--ink);border:1px solid var(--line);margin-left:8px" onclick="cancelEdit()">Cancel Edit</button>
+      <div class="admin-msg" id="adminMsg"></div>
     </div>
     <div class="admin-form">
       <label>Website announcement</label><input type="text" id="announcementInput" placeholder="Example: Eid Sale — Up to Rs. 5,000 off selected phones"><button class="save-btn" onclick="saveAnnouncement()">Save Announcement</button><div class="admin-msg" id="announcementMsg"></div>
@@ -519,6 +521,7 @@ let auth = null;
 let authMode = 'login';
 let selectedPhone = null;
 let selectedFamily = [];
+let editingId = null;
 
 function isFirebaseConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY'); }
 function safeNum(v){ const n=Number(v); return Number.isFinite(n)?n:0; }
@@ -620,7 +623,44 @@ async function addPhone(){
  const msg=document.getElementById('adminMsg');msg.className='admin-msg';msg.textContent=''; if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
  const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),company=document.getElementById('fCompany').value.trim(),category=document.getElementById('fCategory').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
  if(!baseName||!name||price<=0){msg.className='admin-msg err';msg.textContent='Model name and a valid sale price are required.';return;}
- try{await db.collection('phones').add({baseName,variant,name,price,oldPrice,qty,image,specs,company,category,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';['fBaseName','fVariant','fName','fPrice','fOldPrice','fQty','fImage','fSpecs','fCompany','fCategory'].forEach(id=>document.getElementById(id).value='');document.getElementById('fGift').checked=false;document.getElementById('fFeatured').checked=false;}catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.';}
+ try{
+   if(editingId){
+     await db.collection('phones').doc(editingId).update({baseName,variant,name,price,oldPrice,qty,image,specs,company,category,gift,featured});
+     msg.className='admin-msg ok';msg.textContent='Mobile/variant updated.';
+   }else{
+     await db.collection('phones').add({baseName,variant,name,price,oldPrice,qty,image,specs,company,category,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+     msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';
+   }
+   cancelEdit();
+ }catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.';}
+}
+function fillFormForEdit(id){
+  const p=phones.find(x=>x.id===id); if(!p)return;
+  editingId=id;
+  document.getElementById('fBaseName').value=p.baseName||'';
+  document.getElementById('fVariant').value=p.variant||'';
+  document.getElementById('fName').value=p.name||'';
+  document.getElementById('fPrice').value=p.price||'';
+  document.getElementById('fOldPrice').value=p.oldPrice||'';
+  document.getElementById('fQty').value=p.qty||'';
+  document.getElementById('fImage').value=p.image||'';
+  document.getElementById('fSpecs').value=p.specs||'';
+  document.getElementById('fCompany').value=p.company||'';
+  document.getElementById('fCategory').value=p.category||'';
+  document.getElementById('fGift').checked=!!p.gift;
+  document.getElementById('fFeatured').checked=!!p.featured;
+  document.getElementById('savePhoneBtn').textContent='Update Mobile / Variant';
+  document.getElementById('cancelEditBtn').style.display='inline-block';
+  document.getElementById('adminMsg').textContent='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function cancelEdit(){
+  editingId=null;
+  ['fBaseName','fVariant','fName','fPrice','fOldPrice','fQty','fImage','fSpecs','fCompany','fCategory'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fGift').checked=false;
+  document.getElementById('fFeatured').checked=false;
+  document.getElementById('savePhoneBtn').textContent='Add Mobile / Variant';
+  document.getElementById('cancelEditBtn').style.display='none';
 }
 async function bulkAddPhones(){
   const msg=document.getElementById('bulkMsg'); msg.className='admin-msg'; msg.textContent='';
@@ -651,7 +691,7 @@ async function bulkAddPhones(){
   }catch(e){ console.error(e); msg.className='admin-msg err'; msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.'; }
 }
 async function saveAnnouncement(){const msg=document.getElementById('announcementMsg');if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in as an authorized admin.';return;}try{await db.collection('settings').doc('site').set({announcement:document.getElementById('announcementInput').value.trim()},{merge:true});msg.className='admin-msg ok';msg.textContent='Announcement saved.';}catch(e){msg.className='admin-msg err';msg.textContent='Announcement could not be saved.';}}
-function renderAdminTable(){const body=document.getElementById('adminTableBody');if(!body)return;body.innerHTML='';phones.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="row-check" value="${p.id}" onchange="updateSelectedCount()"></td><td><img src="${escapeHtml(p.image||'')}"></td><td>${escapeHtml(p.baseName||p.name)}<br><small>${escapeHtml(p.variant||'')}</small></td><td><input type="text" value="${safeNum(p.price)}" data-field="price" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.oldPrice)}" data-field="oldPrice" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.qty)}" data-field="qty" data-id="${p.id}"></td><td><input type="checkbox" ${p.featured?'checked':''} data-field="featured" data-id="${p.id}"></td><td><button class="upd" onclick="updatePhone('${p.id}')">Update</button><button class="del" onclick="deletePhone('${p.id}')">Delete</button></td>`;body.appendChild(tr);});updateSelectedCount();}
+function renderAdminTable(){const body=document.getElementById('adminTableBody');if(!body)return;body.innerHTML='';phones.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="row-check" value="${p.id}" onchange="updateSelectedCount()"></td><td><img src="${escapeHtml(p.image||'')}"></td><td>${escapeHtml(p.baseName||p.name)}<br><small>${escapeHtml(p.variant||'')}</small></td><td><input type="text" value="${safeNum(p.price)}" data-field="price" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.oldPrice)}" data-field="oldPrice" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.qty)}" data-field="qty" data-id="${p.id}"></td><td><input type="checkbox" ${p.featured?'checked':''} data-field="featured" data-id="${p.id}"></td><td><button class="upd" onclick="updatePhone('${p.id}')">Update</button><button class="upd" onclick="fillFormForEdit('${p.id}')">Edit</button><button class="del" onclick="deletePhone('${p.id}')">Delete</button></td>`;body.appendChild(tr);});updateSelectedCount();}
 function toggleSelectAll(checkbox){ document.querySelectorAll('.row-check').forEach(c=>c.checked=checkbox.checked); updateSelectedCount(); }
 function updateSelectedCount(){ const el=document.getElementById('selectedCountNote'); if(el) el.textContent = document.querySelectorAll('.row-check:checked').length + ' selected'; }
 async function bulkDeleteSelected(){
