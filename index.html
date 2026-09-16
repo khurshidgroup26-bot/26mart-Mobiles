@@ -440,9 +440,9 @@
       <label>Bulk Add (add many mobiles/variants at once)</label>
       <div style="font-size:12px; color:var(--muted); background:#EEF0F8; border-radius:8px; padding:10px 12px; margin-bottom:10px; line-height:1.5;">
         One line = one mobile/variant. Separate fields with <b>|</b> in this order:<br>
-        <code>Model family | Variant | Sale Price | Before-discount Price | Quantity | Image path | Specs | Brand | Category | Gift(yes/no) | Featured(yes/no)</code><br><br>
+        <code>Model family | Variant | Brand | Category | Sale Price | Before-discount Price | Quantity | Image path | Specs | Gift(yes/no) | Featured(yes/no)</code><br><br>
         Example:<br>
-        <code>Spark Go 3 | 4GB/128GB | 45000 | 50000 | 10 | images/go3.jpg | RAM: 4GB; Storage: 128GB | Tecno | Smartphone | yes | no</code>
+        <code>Spark Go 3 | 4GB/128GB | Tecno | Smartphone | 45000 | 50000 | 10 | images/go3.jpg | RAM: 4GB; Storage: 128GB | yes | no</code>
       </div>
       <textarea id="bulkInput" rows="6" style="width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:13px; font-family:inherit;" placeholder="Paste multiple lines here..."></textarea>
       <button class="save-btn" onclick="bulkAddPhones()">Add All</button><div class="admin-msg" id="bulkMsg"></div>
@@ -630,7 +630,7 @@ async function bulkAddPhones(){
   const rows=[];
   lines.forEach(line=>{
     const parts=line.split('|').map(s=>s.trim());
-    const [baseName,variant,price,oldPrice,qty,image,specs,company,category,gift,featured]=parts;
+    const [baseName,variant,company,category,price,oldPrice,qty,image,specs,gift,featured]=parts;
     if(!baseName||!price) return;
     rows.push({
       baseName, variant: variant||'', name: variant?(baseName+' '+variant):baseName,
