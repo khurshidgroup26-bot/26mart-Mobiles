@@ -265,23 +265,18 @@
       <h2>Available Mobiles</h2>
       <p>Choose a model, compare its variants and specs, then place your order on the website. Pay at delivery or at shop pickup.</p>
     </div>
-    <div class="filter-bar" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
-      <input type="text" id="searchInput" placeholder="Mobile search karein (naam ya variant)..." oninput="onSearch(this.value)" style="padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff;">
-      <div class="chips" id="categoryChips" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <select id="companyFilter" onchange="onCompanyChange(this.value)" style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);">
-          <option value="all">Sari Companies</option>
-        </select>
-        <select id="priceFilter" onchange="onPriceChange(this.value)" style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);">
-          <option value="all">Sab Prices</option>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+      <input type="text" id="searchInput" placeholder="Search by mobile or brand..." oninput="onSearch(this.value)" style="padding:11px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; background:#fff;">
+      <div class="chips" id="categoryChips" style="display:flex; gap:7px; flex-wrap:wrap;"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <select id="companyFilter" onchange="onCompanyChange(this.value)" style="padding:9px 11px; border:1px solid var(--line); border-radius:9px; font-size:13px; background:#fff; color:var(--ink);"><option value="all">All Brands</option></select>
+        <select id="priceFilter" onchange="onPriceChange(this.value)" style="padding:9px 11px; border:1px solid var(--line); border-radius:9px; font-size:13px; background:#fff; color:var(--ink);">
+          <option value="all">All Prices</option>
           <option value="0-30000">0 – 30,000</option>
           <option value="30000-60000">30,000 – 60,000</option>
           <option value="60000-100000">60,000 – 100,000</option>
           <option value="100000-999999999">100,000+</option>
         </select>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;">
-          <input type="checkbox" id="stockOnlyToggle" onchange="onStockOnlyChange(this.checked)" style="width:auto;"> Sirf Stock Mein
-        </label>
       </div>
     </div>
     <div id="loadingNote" class="empty-note">Phones load ho rahe hain...</div>
@@ -419,10 +414,6 @@
         <div><label>Variant</label><input type="text" id="fVariant" placeholder="4GB / 128GB"></div>
       </div>
       <div class="f-row">
-        <div><label>Company / Brand</label><input type="text" id="fCompany" placeholder="Infinix"></div>
-        <div><label>Category</label><input type="text" id="fCategory" placeholder="Smartphone"></div>
-      </div>
-      <div class="f-row">
         <div><label>Display name</label><input type="text" id="fName" placeholder="Spark Go 3 4GB/128GB"></div>
         <div><label>Sale price (Rs.)</label><input type="number" id="fPrice" min="0" placeholder="45000"></div>
       </div>
@@ -434,27 +425,36 @@
         <div><label>Image path / URL</label><input type="text" id="fImage" placeholder="images/spark-go-3.jpg"></div>
         <div><label>Specifications</label><input type="text" id="fSpecs" placeholder="RAM, storage, display, camera, battery..."></div>
       </div>
+      <div class="f-row">
+        <div><label>Brand / Company</label><input type="text" id="fCompany" placeholder="Tecno"></div>
+        <div><label>Category</label><input type="text" id="fCategory" placeholder="Smartphone"></div>
+      </div>
       <div class="f-row"><div><label><input type="checkbox" id="fGift" style="width:auto;margin-right:6px;"> Free gift</label></div><div><label><input type="checkbox" id="fFeatured" style="width:auto;margin-right:6px;"> Show at top</label></div></div>
-      <button class="save-btn" id="savePhoneBtn" onclick="addPhone()">Add Mobile / Variant</button>
-      <button class="save-btn" id="cancelEditBtn" style="display:none;background:var(--paper);color:var(--ink);border:1px solid var(--line);margin-left:8px" onclick="cancelEdit()">Cancel Edit</button>
-      <div class="admin-msg" id="adminMsg"></div>
-    </div>
-    <div class="admin-form">
-      <label>Bulk Add (ek line = ek mobile/variant)</label>
-      <p style="font-size:11.5px;color:var(--muted);margin:2px 0 8px;line-height:1.5">
-        Format: Model Name | Variant | Company | Category | Price | Before Price | Qty | Image URL | Specs (semicolon ; se separate) | Gift(yes/no) | Featured(yes/no)<br>
-        Misaal: <code>Spark Go 3|4GB/128GB|Infinix|Smartphone|45000|50000|5|images/spark-go-3.jpg|6.6 inch display;5000mAh battery|yes|no</code>
-      </p>
-      <textarea id="bulkInput" rows="6" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:monospace"></textarea>
-      <button class="save-btn" onclick="bulkAddPhones()">Bulk Add Karein</button><div class="admin-msg" id="bulkMsg"></div>
+      <button class="save-btn" onclick="addPhone()">Add Mobile / Variant</button><div class="admin-msg" id="adminMsg"></div>
     </div>
     <div class="admin-form">
       <label>Website announcement</label><input type="text" id="announcementInput" placeholder="Example: Eid Sale — Up to Rs. 5,000 off selected phones"><button class="save-btn" onclick="saveAnnouncement()">Save Announcement</button><div class="admin-msg" id="announcementMsg"></div>
     </div>
 
+    <div class="admin-form">
+      <label>Bulk Add (add many mobiles/variants at once)</label>
+      <div style="font-size:12px; color:var(--muted); background:#EEF0F8; border-radius:8px; padding:10px 12px; margin-bottom:10px; line-height:1.5;">
+        One line = one mobile/variant. Separate fields with <b>|</b> in this order:<br>
+        <code>Model family | Variant | Sale Price | Before-discount Price | Quantity | Image path | Specs | Brand | Category | Gift(yes/no) | Featured(yes/no)</code><br><br>
+        Example:<br>
+        <code>Spark Go 3 | 4GB/128GB | 45000 | 50000 | 10 | images/go3.jpg | RAM: 4GB; Storage: 128GB | Tecno | Smartphone | yes | no</code>
+      </div>
+      <textarea id="bulkInput" rows="6" style="width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:13px; font-family:inherit;" placeholder="Paste multiple lines here..."></textarea>
+      <button class="save-btn" onclick="bulkAddPhones()">Add All</button><div class="admin-msg" id="bulkMsg"></div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:14px 0; flex-wrap:wrap;">
+      <button class="close-admin" onclick="bulkDeleteSelected()">Delete Selected</button>
+      <span id="selectedCountNote" style="font-size:12.5px; color:var(--muted);">0 selected</span>
+    </div>
     <table class="admin-table">
       <thead>
-        <tr><th>Image</th><th>Model / Variant</th><th>Sale</th><th>Before</th><th>Qty</th><th>Featured</th><th></th></tr>
+        <tr><th><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)"></th><th>Image</th><th>Model / Variant</th><th>Sale</th><th>Before</th><th>Qty</th><th>Featured</th><th></th></tr>
       </thead>
       <tbody id="adminTableBody"></tbody>
     </table>
@@ -509,18 +509,16 @@ const FIREBASE_CONFIG = {
    ========================================================================= */
 
 let phones = [];
+let searchQuery = '';
+let activeCategory = 'all';
+let activeCompany = 'all';
+let activePriceRange = 'all';
 let usingFirebase = false;
 let db = null;
 let auth = null;
 let authMode = 'login';
 let selectedPhone = null;
 let selectedFamily = [];
-let editingId = null;
-let searchQuery = '';
-let activePriceRange = 'all';
-let stockOnlyFilter = false;
-let activeCategory = 'all';
-let activeCompany = 'all';
 
 function isFirebaseConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY'); }
 function safeNum(v){ const n=Number(v); return Number.isFinite(n)?n:0; }
@@ -543,25 +541,32 @@ async function initStorage(){
   usingFirebase=false; document.getElementById('demoBanner').style.display='block'; renderOfferStrip(''); buildFilterOptions(); renderShop(); renderAdminTable();
 }
 function renderOfferStrip(announcement=''){ const track=document.getElementById('offerTrack'); const msgs=[announcement,...OFFER_MESSAGES].filter(Boolean); const items=msgs.map(m=>`<span>${escapeHtml(m)}</span>`).join(''); track.innerHTML=items+items; }
-function sortedPhones(){ return [...phones].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)); }
 function buildFilterOptions(){
-  const categories=[...new Set(phones.map(p=>p.category).filter(Boolean))];
-  const companies=[...new Set(phones.map(p=>p.company).filter(Boolean))];
-  const chipsWrap=document.getElementById('categoryChips');
-  chipsWrap.innerHTML='<button class="chip '+(activeCategory==='all'?'active':'')+'" onclick="onCategoryChange(\'all\')">Sab</button>'+
-    categories.map(c=>`<button class="chip ${activeCategory===c?'active':''}" onclick="onCategoryChange('${escapeHtml(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join('');
-  const companySel=document.getElementById('companyFilter'); const currentVal=companySel.value;
-  companySel.innerHTML='<option value="all">Sari Companies</option>'+companies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  if(companies.includes(currentVal)) companySel.value=currentVal;
+  const categories = [...new Set(phones.map(p=>p.category).filter(Boolean))];
+  const companies = [...new Set(phones.map(p=>p.company).filter(Boolean))];
+  const chipsWrap = document.getElementById('categoryChips');
+  if(chipsWrap){
+    chipsWrap.innerHTML = '<button class="chip active" data-cat="all" onclick="onCategoryChange(\'all\')">All</button>' +
+      categories.map(c=>`<button class="chip" data-cat="${escapeHtml(c)}" onclick="onCategoryChange('${escapeHtml(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join('');
+  }
+  const companySel = document.getElementById('companyFilter');
+  if(companySel){
+    const currentVal = companySel.value;
+    companySel.innerHTML = '<option value="all">All Brands</option>' + companies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    if(companies.includes(currentVal)) companySel.value = currentVal;
+  }
 }
 function onSearch(val){ searchQuery = val.trim().toLowerCase(); renderShop(); }
-function onPriceChange(val){ activePriceRange = val; renderShop(); }
-function onStockOnlyChange(val){ stockOnlyFilter = val; renderShop(); }
-function onCategoryChange(cat){ activeCategory = cat; buildFilterOptions(); renderShop(); }
+function onCategoryChange(cat){
+  activeCategory = cat;
+  document.querySelectorAll('#categoryChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.cat===cat));
+  renderShop();
+}
 function onCompanyChange(val){ activeCompany = val; renderShop(); }
+function onPriceChange(val){ activePriceRange = val; renderShop(); }
 function passesFilters(p){
   if(searchQuery){
-    const hay = ((p.baseName||p.name||'')+' '+(p.variant||'')+' '+(p.company||'')).toLowerCase();
+    const hay = ((p.name||'')+' '+(p.baseName||'')+' '+(p.company||'')).toLowerCase();
     if(!hay.includes(searchQuery)) return false;
   }
   if(activeCategory!=='all' && p.category!==activeCategory) return false;
@@ -573,19 +578,18 @@ function passesFilters(p){
   }
   return true;
 }
+function sortedPhones(){ return [...phones].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)); }
 function renderShop(){
   document.getElementById('loadingNote').style.display='none'; const grid=document.getElementById('productGrid'); const empty=document.getElementById('emptyNote'); grid.innerHTML='';
-  if(!phones.length){empty.textContent='No mobiles are listed right now. Please check again soon.';empty.style.display='block';return} empty.style.display='none';
-  const groups=new Map(); sortedPhones().filter(passesFilters).forEach(p=>{const key=normalizeFamily(p); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(p);});
-  let shown=0;
+  const visible = sortedPhones().filter(passesFilters);
+  if(!visible.length){empty.style.display='block';return} empty.style.display='none';
+  const groups=new Map(); visible.forEach(p=>{const key=normalizeFamily(p); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(p);});
   groups.forEach(group=>{
-    const p=group[0], inStock=group.some(x=>safeNum(x.qty)>0); if(stockOnlyFilter && !inStock) return; shown++;
-    const card=document.createElement('div'); card.className='pcard '+(group.some(x=>x.featured)?'featured':'');
+    const p=group[0], inStock=group.some(x=>safeNum(x.qty)>0); const card=document.createElement('div'); card.className='pcard '+(group.some(x=>x.featured)?'featured':'');
     const img=p.image?`<img src="${escapeHtml(p.image)}" alt="${escapeHtml(familyName(p))}" onerror="this.parentElement.innerHTML='<div class=&quot;noimg&quot;>Image unavailable</div>'">`:'<div class="noimg">No image</div>';
     card.innerHTML=`${group.some(x=>x.featured)?'<div class="featured-label">★ Featured</div>':''}${p.gift?'<div class="gift-flag">🎁 Free Gift</div>':''}<div class="imgwrap">${img}</div><div class="body"><p class="pname">${escapeHtml(familyName(p))}</p><div><span class="old-price">${p.oldPrice?fmtPrice(p.oldPrice):''}</span><span class="sale-price">${fmtPrice(p.price)}</span></div><div class="stock-row ${inStock?'in':'out'}"><span class="dot ${inStock?'':'out'}"></span>${inStock?'Stock Available':'Out of Stock'}</div><div class="view-count">${safeNum(p.views)} total views</div><button class="order-btn" onclick="openProduct('${p.id}')">View Variants & Details</button></div>`;
     grid.appendChild(card);
   });
-  if(!shown){ empty.textContent='Is search/filter ke sath koi mobile nahi mila.'; empty.style.display='block'; }
 }
 function openProduct(id){
   const base=phones.find(p=>p.id===id); if(!base)return; selectedFamily=phones.filter(p=>normalizeFamily(p)===normalizeFamily(base)); selectedPhone=base; renderProductModal(); document.getElementById('productModal').classList.add('show'); incrementView(base.id);
@@ -614,78 +618,54 @@ function showAdminIfAuthorized(){ if(!auth||!auth.currentUser){openAuthModal('lo
 function closeAdminPanel(){document.getElementById('adminPanel').style.display='none';window.scrollTo({top:0,behavior:'smooth'});}
 async function addPhone(){
  const msg=document.getElementById('adminMsg');msg.className='admin-msg';msg.textContent=''; if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
- const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),company=document.getElementById('fCompany').value.trim(),category=document.getElementById('fCategory').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
+ const baseName=document.getElementById('fBaseName').value.trim(),variant=document.getElementById('fVariant').value.trim(),name=document.getElementById('fName').value.trim()||baseName,price=safeNum(document.getElementById('fPrice').value),oldPrice=safeNum(document.getElementById('fOldPrice').value),qty=safeNum(document.getElementById('fQty').value),image=document.getElementById('fImage').value.trim(),specs=document.getElementById('fSpecs').value.trim(),company=document.getElementById('fCompany').value.trim(),category=document.getElementById('fCategory').value.trim(),gift=document.getElementById('fGift').checked,featured=document.getElementById('fFeatured').checked;
  if(!baseName||!name||price<=0){msg.className='admin-msg err';msg.textContent='Model name and a valid sale price are required.';return;}
- try{
-   if(editingId){
-     await db.collection('phones').doc(editingId).update({baseName,variant,company,category,name,price,oldPrice,qty,image,specs,gift,featured});
-     msg.className='admin-msg ok';msg.textContent='Mobile/variant updated.';
-   }else{
-     await db.collection('phones').add({baseName,variant,company,category,name,price,oldPrice,qty,image,specs,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-     msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';
-   }
-   cancelEdit();
- }catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.';}
-}
-function fillFormForEdit(id){
-  const p=phones.find(x=>x.id===id); if(!p)return;
-  editingId=id;
-  document.getElementById('fBaseName').value=p.baseName||'';
-  document.getElementById('fVariant').value=p.variant||'';
-  document.getElementById('fCompany').value=p.company||'';
-  document.getElementById('fCategory').value=p.category||'';
-  document.getElementById('fName').value=p.name||'';
-  document.getElementById('fPrice').value=p.price||'';
-  document.getElementById('fOldPrice').value=p.oldPrice||'';
-  document.getElementById('fQty').value=p.qty||'';
-  document.getElementById('fImage').value=p.image||'';
-  document.getElementById('fSpecs').value=p.specs||'';
-  document.getElementById('fGift').checked=!!p.gift;
-  document.getElementById('fFeatured').checked=!!p.featured;
-  document.getElementById('savePhoneBtn').textContent='Update Mobile / Variant';
-  document.getElementById('cancelEditBtn').style.display='inline-block';
-  document.getElementById('adminMsg').textContent='';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function cancelEdit(){
-  editingId=null;
-  ['fBaseName','fVariant','fCompany','fCategory','fName','fPrice','fOldPrice','fQty','fImage','fSpecs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fGift').checked=false;
-  document.getElementById('fFeatured').checked=false;
-  document.getElementById('savePhoneBtn').textContent='Add Mobile / Variant';
-  document.getElementById('cancelEditBtn').style.display='none';
+ try{await db.collection('phones').add({baseName,variant,name,price,oldPrice,qty,image,specs,company,category,gift,featured,views:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});msg.className='admin-msg ok';msg.textContent='Mobile/variant added.';['fBaseName','fVariant','fName','fPrice','fOldPrice','fQty','fImage','fSpecs','fCompany','fCategory'].forEach(id=>document.getElementById(id).value='');document.getElementById('fGift').checked=false;document.getElementById('fFeatured').checked=false;}catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.';}
 }
 async function bulkAddPhones(){
-  const msg=document.getElementById('bulkMsg');msg.className='admin-msg';msg.textContent='';
+  const msg=document.getElementById('bulkMsg'); msg.className='admin-msg'; msg.textContent='';
   if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
-  const raw=document.getElementById('bulkInput').value;
-  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);
-  if(!lines.length){msg.className='admin-msg err';msg.textContent='Kam az kam ek line likhein.';return;}
-  const items=[];
+  const lines=document.getElementById('bulkInput').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length){msg.className='admin-msg err';msg.textContent='Please enter at least one line.';return;}
+  const rows=[];
   lines.forEach(line=>{
     const parts=line.split('|').map(s=>s.trim());
-    const [baseName,variant,company,category,price,oldPrice,qty,image,specs,gift,featured]=parts;
-    if(!baseName||!price)return;
-    items.push({
-      baseName, variant: variant||'', company: company||'', category: category||'',
-      name: variant?`${baseName} ${variant}`:baseName,
+    const [baseName,variant,price,oldPrice,qty,image,specs,company,category,gift,featured]=parts;
+    if(!baseName||!price) return;
+    rows.push({
+      baseName, variant: variant||'', name: variant?(baseName+' '+variant):baseName,
       price: safeNum(price), oldPrice: safeNum(oldPrice), qty: safeNum(qty),
-      image: image||'', specs: specs?specs.split(';').map(s=>s.trim()).filter(Boolean).join('\n'):'',
+      image: image||'', specs: specs ? specs.split(';').map(s=>s.trim()).filter(Boolean).join('\n') : '',
+      company: company||'', category: category||'',
       gift: (gift||'').toLowerCase()==='yes', featured: (featured||'').toLowerCase()==='yes',
       views:0, createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   });
-  if(!items.length){msg.className='admin-msg err';msg.textContent='Koi valid line nahi mili (Model Name aur Price zaroori hain).';return;}
+  if(!rows.length){msg.className='admin-msg err';msg.textContent='No valid lines found.';return;}
   try{
     const batch=db.batch();
-    items.forEach(it=>{ const ref=db.collection('phones').doc(); batch.set(ref,it); });
+    rows.forEach(r=>{ const ref=db.collection('phones').doc(); batch.set(ref,r); });
     await batch.commit();
-    msg.className='admin-msg ok';msg.textContent=items.length+' mobiles add ho gaye.';
+    msg.className='admin-msg ok'; msg.textContent=rows.length+' mobiles/variants added.';
     document.getElementById('bulkInput').value='';
-  }catch(e){console.error(e);msg.className='admin-msg err';msg.textContent='Save nahi ho saka. Firebase rules check karein.';}
+  }catch(e){ console.error(e); msg.className='admin-msg err'; msg.textContent='Save failed. Check Firebase Authentication and Firestore rules.'; }
 }
 async function saveAnnouncement(){const msg=document.getElementById('announcementMsg');if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in as an authorized admin.';return;}try{await db.collection('settings').doc('site').set({announcement:document.getElementById('announcementInput').value.trim()},{merge:true});msg.className='admin-msg ok';msg.textContent='Announcement saved.';}catch(e){msg.className='admin-msg err';msg.textContent='Announcement could not be saved.';}}
-function renderAdminTable(){const body=document.getElementById('adminTableBody');if(!body)return;body.innerHTML='';phones.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td><img src="${escapeHtml(p.image||'')}"></td><td>${escapeHtml(p.baseName||p.name)}<br><small>${escapeHtml(p.variant||'')}</small></td><td><input type="text" value="${safeNum(p.price)}" data-field="price" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.oldPrice)}" data-field="oldPrice" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.qty)}" data-field="qty" data-id="${p.id}"></td><td><input type="checkbox" ${p.featured?'checked':''} data-field="featured" data-id="${p.id}"></td><td><button class="upd" onclick="updatePhone('${p.id}')">Update</button><button class="upd" onclick="fillFormForEdit('${p.id}')">Edit</button><button class="del" onclick="deletePhone('${p.id}')">Delete</button></td>`;body.appendChild(tr);});}
+function renderAdminTable(){const body=document.getElementById('adminTableBody');if(!body)return;body.innerHTML='';phones.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="row-check" value="${p.id}" onchange="updateSelectedCount()"></td><td><img src="${escapeHtml(p.image||'')}"></td><td>${escapeHtml(p.baseName||p.name)}<br><small>${escapeHtml(p.variant||'')}</small></td><td><input type="text" value="${safeNum(p.price)}" data-field="price" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.oldPrice)}" data-field="oldPrice" data-id="${p.id}"></td><td><input type="text" value="${safeNum(p.qty)}" data-field="qty" data-id="${p.id}"></td><td><input type="checkbox" ${p.featured?'checked':''} data-field="featured" data-id="${p.id}"></td><td><button class="upd" onclick="updatePhone('${p.id}')">Update</button><button class="del" onclick="deletePhone('${p.id}')">Delete</button></td>`;body.appendChild(tr);});updateSelectedCount();}
+function toggleSelectAll(checkbox){ document.querySelectorAll('.row-check').forEach(c=>c.checked=checkbox.checked); updateSelectedCount(); }
+function updateSelectedCount(){ const el=document.getElementById('selectedCountNote'); if(el) el.textContent = document.querySelectorAll('.row-check:checked').length + ' selected'; }
+async function bulkDeleteSelected(){
+  if(!auth||!auth.currentUser){alert('Please login as admin.');return;}
+  const ids=Array.from(document.querySelectorAll('.row-check:checked')).map(c=>c.value);
+  if(!ids.length){alert('Select at least one mobile first.');return;}
+  if(!confirm('Delete '+ids.length+' selected items? This cannot be undone.')) return;
+  try{
+    const batch=db.batch();
+    ids.forEach(id=>batch.delete(db.collection('phones').doc(id)));
+    await batch.commit();
+    const selectAll=document.getElementById('selectAllCheckbox'); if(selectAll) selectAll.checked=false;
+  }catch(e){ console.error(e); alert('Delete failed.'); }
+}
 async function updatePhone(id){if(!auth||!auth.currentUser){alert('Please login as admin.');return;}const price=safeNum(document.querySelector(`input[data-id="${id}"][data-field="price"]`).value),oldPrice=safeNum(document.querySelector(`input[data-id="${id}"][data-field="oldPrice"]`).value),qty=safeNum(document.querySelector(`input[data-id="${id}"][data-field="qty"]`).value),featured=document.querySelector(`input[data-id="${id}"][data-field="featured"]`).checked;try{await db.collection('phones').doc(id).update({price,oldPrice,qty,featured});}catch(e){alert('Update failed.');}}
 async function deletePhone(id){if(!auth||!auth.currentUser)return;if(!confirm('Delete this product?'))return;try{await db.collection('phones').doc(id).delete();}catch(e){alert('Delete failed.');}}
 
