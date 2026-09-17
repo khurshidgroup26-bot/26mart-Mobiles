@@ -1,6 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  ID: 120249799937840073
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>26 Mart Mobiles — Wah Cantt | Mobile Phones Online</title>
@@ -12,6 +14,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<!-- EmailJS: sends an email alert to the admin whenever a customer places an order -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <style>
   :root{
@@ -450,6 +454,15 @@
       <button class="save-btn" onclick="bulkAddPhones()">Add All</button><div class="admin-msg" id="bulkMsg"></div>
     </div>
 
+    <div class="section-head" style="margin-top:8px;">
+      <h2 style="font-size:18px;">Orders</h2>
+      <p>New orders placed by customers appear here automatically.</p>
+    </div>
+    <table class="admin-table" style="margin-bottom:26px;">
+      <thead><tr><th>Mobile</th><th>Price</th><th>Customer</th><th>Area / Address</th><th>Payment</th><th>Status</th><th></th></tr></thead>
+      <tbody id="ordersTableBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:14px">Login as admin to load orders.</td></tr></tbody>
+    </table>
+
     <div style="display:flex; align-items:center; gap:10px; margin:14px 0; flex-wrap:wrap;">
       <button class="close-admin" onclick="bulkDeleteSelected()">Delete Selected</button>
       <span id="selectedCountNote" style="font-size:12.5px; color:var(--muted);">0 selected</span>
@@ -494,6 +507,16 @@ const CALL_NUMBER = "923390011126";
 // what the admin panel UI checks against for the logged-in user.
 const ADMIN_UIDS = ["vi8TxzARJpaM746urZnoqbY18Nv1"];
 
+// ---- EMAIL ORDER ALERTS (EmailJS) ----
+// Sign up free at emailjs.com, connect your Gmail, make a template, then paste the 3 IDs below.
+// Until publicKey is filled in, order emails simply won't be sent (no error to the customer).
+const EMAILJS_CONFIG = {
+  publicKey: "YOUR_EMAILJS_PUBLIC_KEY",
+  serviceId: "YOUR_EMAILJS_SERVICE_ID",
+  templateId: "YOUR_EMAILJS_TEMPLATE_ID",
+  adminEmail: "your-email@gmail.com"
+};
+
 // ---- FIREBASE CONFIG ----
 // Apna Firebase project banane ke baad, yahan apni config paste karein.
 // Jab tak apiKey "YOUR_API_KEY" hi hai, website automatically "demo mode" mein chalegi.
@@ -522,6 +545,24 @@ let authMode = 'login';
 let selectedPhone = null;
 let selectedFamily = [];
 let editingId = null;
+let orders = [];
+let ordersUnsub = null;
+
+function isEmailAlertsConfigured(){ return !!(EMAILJS_CONFIG.publicKey && EMAILJS_CONFIG.publicKey !== 'YOUR_EMAILJS_PUBLIC_KEY'); }
+if(typeof emailjs !== 'undefined' && isEmailAlertsConfigured()){ try{ emailjs.init(EMAILJS_CONFIG.publicKey); }catch(e){ console.warn('EmailJS init failed', e); } }
+function sendOrderEmailAlert(order){
+  if(typeof emailjs === 'undefined' || !isEmailAlertsConfigured()) return;
+  emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+    to_email: EMAILJS_CONFIG.adminEmail,
+    phone_name: order.phoneName,
+    price: fmtPrice(order.price),
+    customer_name: order.customerName,
+    customer_phone: order.phone,
+    area: order.area,
+    address: order.address,
+    payment: order.payment
+  }).catch(e=>console.warn('Order email alert failed', e));
+}
 
 function isFirebaseConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY'); }
 function safeNum(v){ const n=Number(v); return Number.isFinite(n)?n:0; }
@@ -607,7 +648,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 async function shareProduct(){ const url=location.href.split('#')[0]+'#phone='+encodeURIComponent(selectedPhone.id); const data={title:selectedPhone.name,text:'Check out '+selectedPhone.name+' at 26 Mart Mobiles',url}; try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert('Product link copied.');}}catch(e){} }
 async function incrementView(id){ if(!usingFirebase)return; try{await db.collection('phones').doc(id).update({views:firebase.firestore.FieldValue.increment(1)});}catch(e){console.warn('View count failed',e);} }
 function openOrder(){ if(!selectedPhone)return; document.getElementById('orderProductName').textContent=`${selectedPhone.name} — ${fmtPrice(selectedPhone.price)}`; document.getElementById('orderMsg').textContent=''; document.getElementById('orderModal').classList.add('show'); }
-async function submitOrder(e){ e.preventDefault(); const msg=document.getElementById('orderMsg'); msg.className='admin-msg'; msg.textContent=''; const order={phoneId:selectedPhone.id,phoneName:selectedPhone.name,price:safeNum(selectedPhone.price),customerName:document.getElementById('oName').value.trim(),phone:document.getElementById('oPhone').value.trim(),area:document.getElementById('oArea').value.trim(),address:document.getElementById('oAddress').value.trim(),payment:document.getElementById('oPayment').value,createdAt:firebase.firestore?firebase.firestore.FieldValue.serverTimestamp():new Date().toISOString(),status:'new'}; if(!usingFirebase){msg.className='admin-msg ok';msg.textContent='Order form is ready, but Firebase is not connected yet.';return;} try{await db.collection('orders').add(order);msg.className='admin-msg ok';msg.textContent='Order received. No payment is required now. Pay at delivery or shop pickup.';document.getElementById('orderForm').reset();}catch(err){console.error(err);msg.className='admin-msg err';msg.textContent='Order could not be submitted. Please try again.';} }
+async function submitOrder(e){ e.preventDefault(); const msg=document.getElementById('orderMsg'); msg.className='admin-msg'; msg.textContent=''; const order={phoneId:selectedPhone.id,phoneName:selectedPhone.name,price:safeNum(selectedPhone.price),customerName:document.getElementById('oName').value.trim(),phone:document.getElementById('oPhone').value.trim(),area:document.getElementById('oArea').value.trim(),address:document.getElementById('oAddress').value.trim(),payment:document.getElementById('oPayment').value,createdAt:firebase.firestore?firebase.firestore.FieldValue.serverTimestamp():new Date().toISOString(),status:'new'}; if(!usingFirebase){msg.className='admin-msg ok';msg.textContent='Order form is ready, but Firebase is not connected yet.';return;} try{await db.collection('orders').add(order);sendOrderEmailAlert(order);msg.className='admin-msg ok';msg.textContent='Order received. No payment is required now. Pay at delivery or shop pickup.';document.getElementById('orderForm').reset();}catch(err){console.error(err);msg.className='admin-msg err';msg.textContent='Order could not be submitted. Please try again.';} }
 
 function openAuthModal(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'Login':'Create Account';document.getElementById('authSubmit').textContent=mode==='login'?'Login':'Sign Up';document.getElementById('authMsg').textContent='';document.getElementById('authModal').classList.add('show');}
 function toggleAuthMode(){openAuthModal(authMode==='login'?'signup':'login');}
@@ -617,7 +658,34 @@ function renderOtherSites(){if(!OTHER_SITES.length)return;document.getElementByI
 function openAdminGate(){document.getElementById('adminGate').classList.add('show');document.getElementById('adminErr').textContent='';}
 function closeAdminGate(){document.getElementById('adminGate').classList.remove('show');}
 function checkAdminPin(){ closeAdminGate(); showAdminIfAuthorized(); }
-function showAdminIfAuthorized(){ if(!auth||!auth.currentUser){openAuthModal('login');return;} if(!ADMIN_UIDS.includes(auth.currentUser.uid)){alert('Your account is not authorized for admin access.');return;} document.getElementById('adminPanel').style.display='block';document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'}); }
+function showAdminIfAuthorized(){ if(!auth||!auth.currentUser){openAuthModal('login');return;} if(!ADMIN_UIDS.includes(auth.currentUser.uid)){alert('Your account is not authorized for admin access.');return;} document.getElementById('adminPanel').style.display='block';document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'}); startOrdersListener(); }
+function startOrdersListener(){
+  if(!usingFirebase||!db||ordersUnsub) return;
+  ordersUnsub = db.collection('orders').orderBy('createdAt','desc').onSnapshot(snap=>{
+    orders = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderOrdersTable();
+  }, err=>{ console.error(err); const body=document.getElementById('ordersTableBody'); if(body) body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red);padding:14px">Unable to load orders. Check Firestore rules.</td></tr>'; });
+}
+function renderOrdersTable(){
+  const body=document.getElementById('ordersTableBody'); if(!body) return;
+  if(!orders.length){ body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:14px">No orders yet.</td></tr>'; return; }
+  body.innerHTML = orders.map(o=>`<tr>
+    <td>${escapeHtml(o.phoneName||'')}</td>
+    <td>${fmtPrice(o.price)}</td>
+    <td>${escapeHtml(o.customerName||'')}<br><small>${escapeHtml(o.phone||'')}</small></td>
+    <td>${escapeHtml(o.area||'')}<br><small>${escapeHtml(o.address||'')}</small></td>
+    <td>${escapeHtml(o.payment||'')}</td>
+    <td><select onchange="updateOrderStatus('${o.id}', this.value)">
+      <option value="new" ${o.status==='new'?'selected':''}>New</option>
+      <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+      <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
+      <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
+    </select></td>
+    <td><button class="del" onclick="deleteOrder('${o.id}')">Delete</button></td>
+  </tr>`).join('');
+}
+async function updateOrderStatus(id,status){ if(!auth||!auth.currentUser)return; try{await db.collection('orders').doc(id).update({status});}catch(e){alert('Status update failed.');} }
+async function deleteOrder(id){ if(!auth||!auth.currentUser)return; if(!confirm('Delete this order?'))return; try{await db.collection('orders').doc(id).delete();}catch(e){alert('Delete failed.');} }
 function closeAdminPanel(){document.getElementById('adminPanel').style.display='none';window.scrollTo({top:0,behavior:'smooth'});}
 async function addPhone(){
  const msg=document.getElementById('adminMsg');msg.className='admin-msg';msg.textContent=''; if(!auth||!auth.currentUser){msg.className='admin-msg err';msg.textContent='Please log in with an authorized admin account.';return;}
